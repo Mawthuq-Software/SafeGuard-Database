@@ -1,0 +1,11 @@
+{
+  "SERVER": {
+    "PORT": "8446",
+    "SECURITY": true,
+    "CERT": {
+      "FULLCHAIN": "",
+      "PK": ""
+    },
+    "AUTH": "ABCDEFG"
+  }
+}
