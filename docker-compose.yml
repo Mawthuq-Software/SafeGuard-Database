@@ -1,0 +1,15 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MARIADB_USER: "TEST"
+      MARIADB_PASSWORD: "TEST"
+      MARIADB_DATABASE: "wgManagerAuth"
+      MARIADB_ROOT_PASSWORD: "TEST2"
+    ports:
+      - "3306:3306"

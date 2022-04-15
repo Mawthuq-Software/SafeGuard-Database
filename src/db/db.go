@@ -16,7 +16,7 @@ func DBStart() {
 	if errCreateDir != nil {
 		log.Fatal("Error - Creating db directory", errCreateDir)
 	}
-	dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "TEST:TEST@tcp(127.0.0.1:3306)/wgManagerAuth?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Error - Failed to connect database")
