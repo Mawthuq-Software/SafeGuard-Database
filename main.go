@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/config"
+	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/db"
+	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/logger"
 	"gitlab.com/raspberry.tech/wireguard-manager-and-api/src/api"
-	"gitlab.com/raspberry.tech/wireguard-manager-and-api/src/db"
-	"gitlab.com/raspberry.tech/wireguard-manager-and-api/src/logger"
 )
 
 func main() {
