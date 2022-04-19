@@ -7,8 +7,8 @@ services:
     image: mariadb
     restart: always
     environment:
-      MARIADB_USER: "TEST"
-      MARIADB_PASSWORD: "TEST"
+      MARIADB_USER: "WGMA"
+      MARIADB_PASSWORD: "#Th1sPassw0rd1sN0tVerySecure"
       MARIADB_DATABASE: "wgManagerAuth"
       MARIADB_ROOT_PASSWORD: "TEST2"
     ports:

@@ -10,25 +10,26 @@ type StandardModel struct {
 
 type Permissions struct {
 	StandardModel
-	Name string
+	Name string `gorm:"unique"`
 }
 
 type Policies struct {
 	StandardModel
-	Name string
+	Name string `gorm:"unique"`
 }
 
 type PolicyPermissions struct {
 	StandardModel
-	PolicyID     int
-	Policies     Policies `gorm:"foreignKey:PolicyID"`
-	PermissionID int
-	Permissions  Permissions `gorm:"foreignKey:PermissionID"`
+	PolicyID       int
+	Policies       Policies `gorm:"foreignKey:PolicyID"`
+	PermissionID   int
+	Permissions    Permissions `gorm:"foreignKey:PermissionID"`
+	PermissionType int
 }
 
 type Groups struct {
 	StandardModel
-	Name string
+	Name string `gorm:"unique"`
 }
 
 type GroupPolicies struct {
@@ -43,7 +44,7 @@ type Authentications struct {
 	StandardModel
 	Username string `gorm:"unique"`
 	Password string
-	Email    string
+	Email    string `gorm:"unique"`
 }
 
 type Users struct {
@@ -56,11 +57,12 @@ type Users struct {
 
 type Servers struct {
 	StandardModel
+	Name       string `gorm:"unique"`
 	Region     string
 	Country    string
 	IPAddress  string
 	Online     bool
 	LastOnline time.Time
-	GroupID    int
-	Groups     Groups `gorm:"foreignKey:GroupID"`
+	// GroupID    int
+	// Groups     Groups `gorm:"foreignKey:GroupID"`
 }

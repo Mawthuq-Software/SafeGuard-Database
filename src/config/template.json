@@ -7,5 +7,12 @@
       "PK": ""
     },
     "AUTH": "ABCDEFG"
+  },
+  "DB": {
+    "USER": "WGMA",
+    "PASSWORD": "#Th1sPassw0rd1sN0tVerySecure",
+    "DATABASE": "wgManagerAuth",
+    "PORT": "3306",
+    "IP": "127.0.0.1"
   }
 }
