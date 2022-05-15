@@ -8,23 +8,10 @@ type StandardModel struct {
 	UpdatedAt time.Time
 }
 
-type Permissions struct {
-	StandardModel
-	Name string `gorm:"unique"`
-}
-
 type Policies struct {
 	StandardModel
-	Name string `gorm:"unique"`
-}
-
-type PolicyPermissions struct {
-	StandardModel
-	PolicyID       int
-	Policies       Policies `gorm:"foreignKey:PolicyID"`
-	PermissionID   int
-	Permissions    Permissions `gorm:"foreignKey:PermissionID"`
-	PermissionType int
+	Name        string `gorm:"unique"`
+	Permissions string
 }
 
 type Groups struct {
