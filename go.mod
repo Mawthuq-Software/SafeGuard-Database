@@ -7,6 +7,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/spf13/viper v1.10.1
 	gitlab.com/raspberry.tech/wireguard-manager-and-api v0.5.1-alpha
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.23.1
