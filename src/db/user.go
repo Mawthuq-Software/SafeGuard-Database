@@ -24,7 +24,7 @@ func AddUser(username string, password string, email string) DatabaseResponse {
 	var passHash Hash
 	hashedPassword, hashErr := passHash.Generate(password)
 	if hashErr != nil {
-		log.Println("Error - Hasing password", hashErr)
+		log.Println("Error - Hashing password", hashErr)
 		processed.Proccessed = false
 		processed.Response = "Error when adding password"
 		return processed
