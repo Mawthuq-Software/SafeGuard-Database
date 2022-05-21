@@ -64,6 +64,39 @@ func AddUser(username string, password string, email string) DatabaseResponse {
 	return processed
 }
 
+func LoginWithUsername(username string, password string) DatabaseResponse {
+	db := DBSystem
+	processed := DatabaseResponse{}
+	var findAuth Authentications
+
+	authQuery := db.Where("username = ?", username).First(&findAuth)
+	if errors.Is(authQuery.Error, gorm.ErrRecordNotFound) {
+		processed.Proccessed = false
+		processed.Response = "User was not found on the system"
+		return processed
+	} else if authQuery.Error != nil {
+		processed.Proccessed = false
+		processed.Response = "Error finding user"
+		return processed
+	}
+	var passHash Hash
+	hashedPassword, hashErr := passHash.Generate(password)
+	if hashErr != nil {
+		log.Println("Error - Hashing password", hashErr)
+		processed.Proccessed = false
+		processed.Response = "Error when finding user"
+		return processed
+	}
+
+	if hashedPassword != findAuth.Password {
+		processed.Proccessed = false
+		processed.Response = "Username or password is incorrect"
+		return processed
+	}
+
+	generateToken(findAuth.Username)
+}
+
 //https://hackernoon.com/how-to-store-passwords-example-in-go-62712b1d2212
 type Hash struct{}
 
