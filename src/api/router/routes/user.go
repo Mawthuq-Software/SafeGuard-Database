@@ -52,6 +52,7 @@ func AddUser(res http.ResponseWriter, req *http.Request) {
 	response.Response = dbRes.Response
 	if !dbRes.Proccessed {
 		responses.Standard(res, response, http.StatusBadRequest)
+		return
 	}
 	responses.Standard(res, response, http.StatusAccepted)
 }

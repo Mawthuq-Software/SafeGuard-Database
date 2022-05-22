@@ -1,10 +1,22 @@
 package token
 
 import (
-	"github.com/dgrijalva/jwt-go"
-	"github.com/form3tech-oss/jwt-go"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
-func GenerateNew(toTokenize string) {
-	jwt.NewWithClaims
+func GenerateNew(toTokenize string, expiryTime time.Time) (string, error) {
+	const SecretKey = "ThisIsMySecretKey"
+	numericDate := jwt.NewNumericDate(expiryTime)
+
+	claims := jwt.NewWithClaims(
+		jwt.SigningMethodHS512,
+		jwt.RegisteredClaims{
+			Issuer:    toTokenize,
+			ExpiresAt: numericDate,
+		})
+
+	token, err := claims.SignedString([]byte(SecretKey))
+	return token, err
 }

@@ -13,11 +13,6 @@ import (
 
 var DBSystem *gorm.DB
 
-type DatabaseResponse struct {
-	Response   string `json:"response"`
-	Proccessed bool   `json:"proccessed"`
-}
-
 func DBStart() {
 	log.Println("Info - Database connection starting")
 	errCreateDir := os.MkdirAll("/opt/wgManagerAuth/db", 0755) //create dir if not exist

@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/viper"
-	"gitlab.com/raspberry.tech/wireguard-manager-and-api/src/api/router"
+	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router"
 )
 
 func API() {
