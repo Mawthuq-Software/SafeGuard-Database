@@ -1,7 +1,6 @@
 package db
 
 import (
-	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -85,9 +84,8 @@ func startupCreation() {
 	AddGroupPolicies("Admin", adminPolicies)
 }
 
-func AddPolicy(policyName string, perms []int) DatabaseResponse {
+func AddPolicy(policyName string, perms []int) error {
 	db := DBSystem
-	processed := DatabaseResponse{}
 
 	totalPerms := ""
 	for i := 0; i < len(perms); i++ {
@@ -99,67 +97,52 @@ func AddPolicy(policyName string, perms []int) DatabaseResponse {
 	result := db.Create(&newPerms)
 	if result.Error != nil {
 		log.Println("Warning - Adding policy"+policyName+"to db", result.Error)
-		processed.Proccessed = false
-		processed.Response = "Unable to add policy to database"
-		return processed
+		return result.Error
 	}
-	processed.Proccessed = true
-	processed.Response = "Added policy successfully"
-	return processed
+	return nil
 }
 
-func AddGroup(groupName string) DatabaseResponse {
+func AddGroup(groupName string) error {
 	db := DBSystem
-	processed := DatabaseResponse{}
 
 	newGroup := Groups{Name: groupName}
 	resultGroup := db.Create(&newGroup)
 	if resultGroup.Error != nil {
 		log.Println("Warning - Adding group"+groupName+"to db", resultGroup.Error)
-		processed.Proccessed = false
-		processed.Response = "Unable to add group to database"
-		return processed
+		return resultGroup.Error
 	}
-	processed.Proccessed = true
-	processed.Response = "Added group successfully"
-	return processed
+	return nil
 }
 
-func AddGroupPolicies(groupName string, policyNames []string) DatabaseResponse {
+func AddGroupPolicies(groupName string, policyNames []string) error {
 	db := DBSystem
-	processed := DatabaseResponse{}
 	var findGroup Groups
+
 	resFindGroup := db.Where("name = ?", groupName).First(&findGroup)
-	if errors.Is(resFindGroup.Error, gorm.ErrRecordNotFound) {
-		processed.Proccessed = false
-		processed.Response = "Group was not found on the server"
-		return processed
+	if resFindGroup.Error != nil {
+		log.Println("Error - Finding group ", resFindGroup.Error)
+		return resFindGroup.Error
 	}
+	// if errors.Is(resFindGroup.Error, gorm.ErrRecordNotFound) {
+	// 	processed.Proccessed = false
+	// 	processed.Response = "Group was not found on the server"
+	// 	return processed
+	// }
 
 	for i := 0; i < len(policyNames); i++ {
 		var findPolicy Policies
 		resFindPol := db.Where("name = ?", policyNames[i]).First(&findPolicy)
-		if errors.Is(resFindPol.Error, gorm.ErrRecordNotFound) {
-			processed.Proccessed = false
-			processed.Response = "Policy" + policyNames[i] + "was not found on the server"
-			return processed
-		} else if resFindPol.Error != nil {
+		if resFindPol.Error != nil {
 			log.Println("Warning - Finding policy"+groupName+"to db", resFindPol.Error)
-			processed.Proccessed = false
-			processed.Response = "Error finding policy"
-			return processed
+			return resFindPol.Error
 		}
 
 		groupPolicy := GroupPolicies{GroupID: findGroup.ID, PolicyID: findPolicy.ID}
 		createGroupPolicy := db.Create(&groupPolicy)
 		if createGroupPolicy.Error != nil {
 			log.Println("Error - Creating group"+groupName+" policy "+policyNames[i]+"to db", resFindPol.Error)
-			processed.Proccessed = false
-			processed.Response = "Error creating group" + groupName + " policy " + policyNames[i]
-			return processed
+			return createGroupPolicy.Error
 		}
 	}
-	processed.Proccessed = true
-	processed.Response = "Added group policies successfully"
-	return processed
+	return nil
 }

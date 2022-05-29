@@ -1,22 +1,46 @@
 package token
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/spf13/viper"
 )
 
-func GenerateNew(toTokenize string, expiryTime time.Time) (string, error) {
-	const SecretKey = "ThisIsMySecretKey"
+func GenerateUser(username string, expiryTime time.Time) (string, error) {
+	issuer := viper.GetString("TOKEN.STRING")
+	secretKey := viper.GetString("TOKEN.SECRETKEY")
 	numericDate := jwt.NewNumericDate(expiryTime)
 
-	claims := jwt.NewWithClaims(
-		jwt.SigningMethodHS512,
-		jwt.RegisteredClaims{
-			Issuer:    toTokenize,
+	claims := jwt.MapClaims{
+		"Username": username,
+		"RegisteredClaims": jwt.RegisteredClaims{
+			Issuer:    issuer,
 			ExpiresAt: numericDate,
-		})
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 
-	token, err := claims.SignedString([]byte(SecretKey))
-	return token, err
+	signedToken, err := token.SignedString([]byte(secretKey))
+	return signedToken, err
+}
+
+func ValidateUser(tokenStr string) (string, error) {
+	secretKey := viper.GetString("TOKEN.SECRETKEY")
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(secretKey), nil
+	})
+
+	claims, valid := token.Claims.(jwt.MapClaims)
+	if valid && token.Valid {
+		return claims["Username"].(string), nil
+	} else {
+		return "", err
+	}
 }

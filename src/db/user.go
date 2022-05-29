@@ -11,122 +11,80 @@ import (
 	"gorm.io/gorm"
 )
 
-func AddUser(username string, password string, email string) DatabaseResponse {
+func AddUser(username string, password string, email string) error {
 	var userAuthStruct Authentications
 	var groupStruct Groups
-	processed := DatabaseResponse{}
 	db := DBSystem
 
-	findUser := db.Where("username = ?", username).Or("email = ?", email).First(&userAuthStruct) //find authentication in database
-	if !errors.Is(findUser.Error, gorm.ErrRecordNotFound) {
-		processed.Proccessed = false
-		processed.Response = "Username or email already exists"
-		return processed
-	} else if findUser.Error != nil {
-		processed.Proccessed = false
-		processed.Response = "Error finding user"
+	findAuth := db.Where("username = ?", username).Or("email = ?", email).First(&userAuthStruct) //find authentication in database
+	if !errors.Is(findAuth.Error, gorm.ErrRecordNotFound) {
+		return ErrUserExists
 	}
 
 	findGroup := db.Where("name = ?", "User").First(&groupStruct)
 	if errors.Is(findGroup.Error, gorm.ErrRecordNotFound) {
-		processed.Proccessed = false
-		processed.Response = "Group was not found"
-		return processed
-
+		return ErrGroupNotFound
 	} else if findGroup.Error != nil {
 		log.Println("Warning - Finding group user in db ", findGroup.Error)
-		processed.Proccessed = false
-		processed.Response = "Error finding group"
-		return processed
+		return ErrQuery
 	}
 
 	var passHash Hash
 	hashedPassword, hashErr := passHash.Generate(password)
 	if hashErr != nil {
 		log.Println("Error - Hashing password", hashErr)
-		processed.Proccessed = false
-		processed.Response = "Error when adding password"
-		return processed
+		return ErrHashing
 	}
 
 	newAuth := Authentications{Username: username, Password: hashedPassword, Email: email}
 	resultAuthCreation := db.Create(&newAuth)
 	if resultAuthCreation.Error != nil {
 		log.Println("Error - Adding authentication to db", resultAuthCreation.Error)
-		processed.Proccessed = false
-		processed.Response = "Error when adding authentication to database"
-		return processed
+		return ErrCreatingAuth
 	}
 
 	newUser := Users{AuthID: newAuth.ID, GroupID: groupStruct.ID}
 	userCreation := db.Create(&newUser)
 	if userCreation.Error != nil {
 		log.Println("Error - Adding user to db", userCreation.Error)
-		processed.Proccessed = false
-		processed.Response = "Error when adding user to database"
-		return processed
+		return ErrCreatingUser
 	}
-
-	processed.Proccessed = true
-	processed.Response = "Added user successfully"
-	return processed
+	return nil
 }
 
-func LoginWithUsername(username string, password string) GenToken {
+func LoginWithUsername(username string, password string) (string, error) {
 	db := DBSystem
-	processed := GenToken{}
 	var findAuth Authentications
 	var findUser Users
 
 	authQuery := db.Where("username = ?", username).First(&findAuth)
 	if errors.Is(authQuery.Error, gorm.ErrRecordNotFound) {
-		processed.Proccessed = false
-		processed.Response = "User was not found on the system"
-		return processed
+		return "", ErrAuthNotFound
 	} else if authQuery.Error != nil {
-		processed.Proccessed = false
-		processed.Response = "Error finding user"
-		return processed
+		log.Println("Error - Finding auth", authQuery.Error)
+		return "", ErrQuery
 	}
 
 	var passHash Hash
-	hashedPassword, hashErr := passHash.Generate(password)
-	if hashErr != nil {
-		log.Println("Error - Hashing password", hashErr)
-		processed.Proccessed = false
-		processed.Response = "Error when finding user"
-		return processed
-	}
-
-	if hashedPassword != findAuth.Password {
-		processed.Proccessed = false
-		processed.Response = "Username or password is incorrect"
-		return processed
+	if passHash.Compare(findAuth.Password, password) != nil {
+		return "", ErrIncorrectPass
 	}
 
 	userQuery := db.Where("auth_id = ?", findAuth.ID).First(&findUser)
 	if errors.Is(userQuery.Error, gorm.ErrRecordNotFound) {
-		processed.Proccessed = false
-		processed.Response = "User was not found on the system"
-		return processed
+		return "", ErrUserNotFound
 	} else if userQuery.Error != nil {
-		processed.Proccessed = false
-		processed.Response = "Error finding user"
-		return processed
+		log.Println("Error - finding user", userQuery.Error)
+		return "", ErrQuery
 	}
 
 	tokenLifetime := time.Now().AddDate(0, 0, 7)
-	generatedToken, tokenErr := token.GenerateNew(strconv.Itoa(findUser.ID), tokenLifetime)
+	generatedToken, tokenErr := token.GenerateUser(strconv.Itoa(findUser.ID), tokenLifetime)
 	if tokenErr != nil {
-		processed.Proccessed = false
-		processed.Response = "Error creating token"
-		return processed
+		log.Println("Error - generating token", tokenErr)
+		return "", ErrCreatingToken
 	}
-
-	processed.Token = generatedToken
-	processed.Proccessed = true
-	processed.Response = "Created token successfully"
-	return processed
+	return generatedToken, nil
 }
 
 //https://hackernoon.com/how-to-store-passwords-example-in-go-62712b1d2212

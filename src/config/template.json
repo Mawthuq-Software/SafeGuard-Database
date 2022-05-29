@@ -1,7 +1,7 @@
 {
   "SERVER": {
     "PORT": "8446",
-    "SECURITY": true,
+    "SECURITY": false,
     "CERT": {
       "FULLCHAIN": "",
       "PK": ""
@@ -16,6 +16,7 @@
     "IP": "127.0.0.1"
   },
   "TOKEN": {
-    "SECRET":
+    "ISSUER": "WGManagerAuth",
+    "SECRETKEY": "ASIDHASDI"
   }
 }

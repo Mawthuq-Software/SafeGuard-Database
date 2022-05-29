@@ -13,6 +13,10 @@ func NewRouter() *mux.Router {
 
 	user := router.PathPrefix("/user").Subrouter()
 	user.HandleFunc("/add", routes.AddUser).Methods("POST")
+	user.HandleFunc("/login", routes.LoginWithUsername).Methods("POST")
+
+	token := router.PathPrefix("/token").Subrouter()
+	token.HandleFunc("/validate", routes.Validate).Methods("POST")
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router

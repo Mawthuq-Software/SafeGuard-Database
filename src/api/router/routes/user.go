@@ -18,41 +18,70 @@ type User struct {
 }
 
 func AddUser(res http.ResponseWriter, req *http.Request) {
-	var incomingJSON User
-	response := responses.StandardResponse{}
+	var bodyReq User
+	bodyRes := responses.StandardResponse{}
 
-	err := parseRequest(req, &incomingJSON)
+	err := parseRequest(req, &bodyReq)
 	if err != nil {
 		log.Println("Error - Parsing request", err)
-		response.Completed = false
-		response.Response = "Error parsing request"
-		responses.Standard(res, response, http.StatusBadRequest)
+		bodyRes.Response = "Error parsing request"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
 
-	if incomingJSON.Username == "" {
-		response.Completed = false
-		response.Response = "Username cannot be blank"
-		responses.Standard(res, response, http.StatusBadRequest)
+	if bodyReq.Username == "" {
+		bodyRes.Response = "username cannot be blank"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
-	} else if incomingJSON.Password == "" {
-		response.Completed = false
-		response.Response = "Password cannot be blank"
-		responses.Standard(res, response, http.StatusBadRequest)
+	} else if bodyReq.Password == "" {
+		bodyRes.Response = "password cannot be blank"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
-	} else if incomingJSON.Email == "" {
-		response.Completed = false
-		response.Response = "Email cannot be blank"
-		responses.Standard(res, response, http.StatusBadRequest)
+	} else if bodyReq.Email == "" {
+		bodyRes.Response = "email cannot be blank"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
 
-	dbRes := db.AddUser(incomingJSON.Username, incomingJSON.Password, incomingJSON.Email)
-	response.Completed = dbRes.Proccessed
-	response.Response = dbRes.Response
-	if !dbRes.Proccessed {
-		responses.Standard(res, response, http.StatusBadRequest)
+	queryError := db.AddUser(bodyReq.Username, bodyReq.Password, bodyReq.Email)
+	if queryError != nil {
+		bodyRes.Response = queryError.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	responses.Standard(res, response, http.StatusAccepted)
+	bodyRes.Response = "user added"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
+}
+
+func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
+	var bodyReq User
+	bodyRes := responses.TokenResponse{}
+
+	err := parseRequest(req, &bodyReq)
+	if err != nil {
+		log.Println("Error - Parsing request", err)
+		bodyRes.Response = "Error parsing request"
+		responses.Token(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if bodyReq.Username == "" {
+		bodyRes.Response = "username cannot be blank"
+		responses.Token(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if bodyReq.Password == "" {
+		bodyRes.Response = "password cannot be blank"
+		responses.Token(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	token, dbErr := db.LoginWithUsername(bodyReq.Username, bodyReq.Password)
+	if dbErr != nil {
+		bodyRes.Response = "could not login user"
+		log.Println(dbErr)
+		responses.Token(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Token = token
+	bodyRes.Response = "successfully created token"
+	responses.Token(res, bodyRes, http.StatusBadRequest)
 }
