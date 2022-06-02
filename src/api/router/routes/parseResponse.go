@@ -6,15 +6,16 @@ import (
 	"net/http"
 )
 
-func ParseRequest(req *http.Request, schema interface{}) error {
+func ParseResponse(resp *http.Response, schema interface{}) error {
 	var unmarshalErr *json.UnmarshalTypeError
 
-	headerContentTtype := req.Header.Get("Content-Type")
-	if headerContentTtype != "application/json" {
-		return errors.New("content type is not application/json")
-	}
+	// headerContentTtype := resp.Header.Get("Content-Type")
+	// fmt.Println(headerContentTtype)
+	// if headerContentTtype != "application/json" {
+	// 	return errors.New("content type is not application/json")
+	// }
 
-	decoder := json.NewDecoder(req.Body)
+	decoder := json.NewDecoder(resp.Body)
 	decoder.DisallowUnknownFields() //throws error if uneeded JSON is added
 	err := decoder.Decode(schema)   //decodes the incoming JSON into the struct
 	if err != nil {

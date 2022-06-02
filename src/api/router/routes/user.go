@@ -21,7 +21,7 @@ func AddUser(res http.ResponseWriter, req *http.Request) {
 	var bodyReq User
 	bodyRes := responses.StandardResponse{}
 
-	err := parseRequest(req, &bodyReq)
+	err := ParseRequest(req, &bodyReq)
 	if err != nil {
 		log.Println("Error - Parsing request", err)
 		bodyRes.Response = "Error parsing request"
@@ -42,7 +42,6 @@ func AddUser(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-
 	queryError := db.AddUser(bodyReq.Username, bodyReq.Password, bodyReq.Email)
 	if queryError != nil {
 		bodyRes.Response = queryError.Error()
@@ -57,7 +56,7 @@ func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
 	var bodyReq User
 	bodyRes := responses.TokenResponse{}
 
-	err := parseRequest(req, &bodyReq)
+	err := ParseRequest(req, &bodyReq)
 	if err != nil {
 		log.Println("Error - Parsing request", err)
 		bodyRes.Response = "Error parsing request"
@@ -83,5 +82,5 @@ func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
 	}
 	bodyRes.Token = token
 	bodyRes.Response = "successfully created token"
-	responses.Token(res, bodyRes, http.StatusBadRequest)
+	responses.Token(res, bodyRes, http.StatusAccepted)
 }
