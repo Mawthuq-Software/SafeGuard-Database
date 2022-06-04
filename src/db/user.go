@@ -43,11 +43,18 @@ func AddUser(username string, password string, email string) error {
 		return ErrCreatingAuth
 	}
 
-	newUser := Users{AuthID: newAuth.ID, GroupID: groupStruct.ID}
+	newUser := Users{AuthID: newAuth.ID}
 	userCreation := db.Create(&newUser)
 	if userCreation.Error != nil {
 		log.Println("Error - Adding user to db", userCreation.Error)
 		return ErrCreatingUser
+	}
+
+	newUserGroup := UserGroups{GroupID: groupStruct.ID, UserID: newUser.ID}
+	userGroupCreation := db.Create(&newUserGroup)
+	if userGroupCreation.Error != nil {
+		log.Println("Error - Adding group to db", userGroupCreation.Error)
+		return ErrCreatingUserGroup
 	}
 	return nil
 }

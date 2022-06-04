@@ -34,10 +34,16 @@ type Authentications struct {
 	Email    string `gorm:"unique"`
 }
 
+type UserGroups struct {
+	StandardModel
+	UserID  int
+	Users   Users `gorm:"foreignKey:UserID"`
+	GroupID int
+	Groups  Groups `gorm:"foreignKey:GroupID"`
+}
+
 type Users struct {
 	StandardModel
-	GroupID         int
-	Groups          Groups `gorm:"foreignKey:GroupID"`
 	AuthID          int
 	Authentications Authentications `gorm:"foreignKey:AuthID"`
 }
