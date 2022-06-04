@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"log"
 	"strconv"
 	"time"
 
@@ -25,35 +24,35 @@ func AddUser(username string, password string, email string) error {
 	if errors.Is(findGroup.Error, gorm.ErrRecordNotFound) {
 		return ErrGroupNotFound
 	} else if findGroup.Error != nil {
-		log.Println("Warning - Finding group user in db ", findGroup.Error)
+		combinedLogger.Warn("Finding group user in db " + findGroup.Error.Error())
 		return ErrQuery
 	}
 
 	var passHash Hash
 	hashedPassword, hashErr := passHash.Generate(password)
 	if hashErr != nil {
-		log.Println("Error - Hashing password", hashErr)
+		combinedLogger.Error("Hashing password " + hashErr.Error())
 		return ErrHashing
 	}
 
 	newAuth := Authentications{Username: username, Password: hashedPassword, Email: email}
 	resultAuthCreation := db.Create(&newAuth)
 	if resultAuthCreation.Error != nil {
-		log.Println("Error - Adding authentication to db", resultAuthCreation.Error)
+		combinedLogger.Error("Adding authentication to db " + resultAuthCreation.Error.Error())
 		return ErrCreatingAuth
 	}
 
 	newUser := Users{AuthID: newAuth.ID}
 	userCreation := db.Create(&newUser)
 	if userCreation.Error != nil {
-		log.Println("Error - Adding user to db", userCreation.Error)
+		combinedLogger.Error("Adding user to db " + userCreation.Error.Error())
 		return ErrCreatingUser
 	}
 
 	newUserGroup := UserGroups{GroupID: groupStruct.ID, UserID: newUser.ID}
 	userGroupCreation := db.Create(&newUserGroup)
 	if userGroupCreation.Error != nil {
-		log.Println("Error - Adding group to db", userGroupCreation.Error)
+		combinedLogger.Error("Adding group to db " + userGroupCreation.Error.Error())
 		return ErrCreatingUserGroup
 	}
 	return nil
@@ -68,7 +67,7 @@ func LoginWithUsername(username string, password string) (string, error) {
 	if errors.Is(authQuery.Error, gorm.ErrRecordNotFound) {
 		return "", ErrAuthNotFound
 	} else if authQuery.Error != nil {
-		log.Println("Error - Finding auth", authQuery.Error)
+		combinedLogger.Error("Finding auth " + authQuery.Error.Error())
 		return "", ErrQuery
 	}
 
@@ -81,14 +80,14 @@ func LoginWithUsername(username string, password string) (string, error) {
 	if errors.Is(userQuery.Error, gorm.ErrRecordNotFound) {
 		return "", ErrUserNotFound
 	} else if userQuery.Error != nil {
-		log.Println("Error - finding user", userQuery.Error)
+		combinedLogger.Error("Finding user " + userQuery.Error.Error())
 		return "", ErrQuery
 	}
 
 	tokenLifetime := time.Now().AddDate(0, 0, 7)
 	generatedToken, tokenErr := token.GenerateUser(strconv.Itoa(findUser.ID), tokenLifetime)
 	if tokenErr != nil {
-		log.Println("Error - generating token", tokenErr)
+		combinedLogger.Error("Generating token " + tokenErr.Error())
 		return "", ErrCreatingToken
 	}
 	return generatedToken, nil

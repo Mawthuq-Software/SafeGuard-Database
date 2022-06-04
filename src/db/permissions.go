@@ -2,8 +2,6 @@ package db
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"strconv"
 
 	"gorm.io/gorm"
@@ -96,7 +94,6 @@ func startupCreation() {
 
 	userSettingPerms := []int{PERSONAL_PASSWORD_RESET, PERSONAL_LOGIN}
 	AddPolicy("STANDARD_USER_SETTINGS", userSettingPerms)
-	fmt.Println("HERE2")
 
 	adminPerms := []int{KEYS_VIEW_ALL, KEYS_ADD_ALL, KEYS_ADD_OVERRIDE, KEYS_DELETE_ALL, KEYS_MODIFY_ALL, PASSWORD_RESET_ALL}
 	AddPolicy("ADMIN_USER", adminPerms)
@@ -121,7 +118,7 @@ func AddPolicy(policyName string, perms []int) error {
 	newPerms := Policies{Name: policyName, Permissions: totalPerms}
 	result := db.Create(&newPerms)
 	if result.Error != nil {
-		log.Println("Warning - Adding policy"+policyName+"to db", result.Error)
+		combinedLogger.Warn("Adding policy " + policyName + " to db " + result.Error.Error())
 		return result.Error
 	}
 	return nil
@@ -133,7 +130,7 @@ func AddGroup(groupName string) error {
 	newGroup := Groups{Name: groupName}
 	resultGroup := db.Create(&newGroup)
 	if resultGroup.Error != nil {
-		log.Println("Warning - Adding group"+groupName+"to db", resultGroup.Error)
+		combinedLogger.Warn("Adding group " + groupName + " to db " + resultGroup.Error.Error())
 		return resultGroup.Error
 	}
 	return nil
@@ -145,7 +142,7 @@ func AddGroupPolicies(groupName string, policyNames []string) error {
 
 	resFindGroup := db.Where("name = ?", groupName).First(&findGroup)
 	if resFindGroup.Error != nil {
-		log.Println("Error - Finding group ", resFindGroup.Error)
+		combinedLogger.Warn("Finding group " + resFindGroup.Error.Error())
 		return resFindGroup.Error
 	}
 
@@ -153,14 +150,14 @@ func AddGroupPolicies(groupName string, policyNames []string) error {
 		var findPolicy Policies
 		resFindPol := db.Where("name = ?", policyNames[i]).First(&findPolicy)
 		if resFindPol.Error != nil {
-			log.Println("Warning - Finding policy"+groupName+"to db", resFindPol.Error)
+			combinedLogger.Warn("Finding policy " + groupName + "to db" + resFindPol.Error.Error())
 			return resFindPol.Error
 		}
 
 		groupPolicy := GroupPolicies{GroupID: findGroup.ID, PolicyID: findPolicy.ID}
 		createGroupPolicy := db.Create(&groupPolicy)
 		if createGroupPolicy.Error != nil {
-			log.Println("Error - Creating group"+groupName+" policy "+policyNames[i]+"to db", resFindPol.Error)
+			combinedLogger.Error("Creating group " + groupName + " policy " + policyNames[i] + "to db" + resFindPol.Error.Error())
 			return createGroupPolicy.Error
 		}
 	}

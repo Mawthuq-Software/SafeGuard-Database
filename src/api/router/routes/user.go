@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"log"
 	"net/http"
 
 	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router/responses"
@@ -23,7 +22,7 @@ func AddUser(res http.ResponseWriter, req *http.Request) {
 
 	err := ParseRequest(req, &bodyReq)
 	if err != nil {
-		log.Println("Error - Parsing request", err)
+		combinedLogger.Error("Parsing request " + err.Error())
 		bodyRes.Response = "Error parsing request"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
@@ -58,7 +57,7 @@ func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
 
 	err := ParseRequest(req, &bodyReq)
 	if err != nil {
-		log.Println("Error - Parsing request", err)
+		combinedLogger.Error("Parsing request " + err.Error())
 		bodyRes.Response = "Error parsing request"
 		responses.Token(res, bodyRes, http.StatusBadRequest)
 		return
@@ -76,7 +75,6 @@ func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
 	token, dbErr := db.LoginWithUsername(bodyReq.Username, bodyReq.Password)
 	if dbErr != nil {
 		bodyRes.Response = "could not login user"
-		log.Println(dbErr)
 		responses.Token(res, bodyRes, http.StatusBadRequest)
 		return
 	}

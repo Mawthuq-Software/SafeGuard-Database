@@ -1,14 +1,15 @@
 package api
 
 import (
-	"fmt"
-	"log"
 	"net"
 	"net/http"
 
 	"github.com/spf13/viper"
 	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router"
+	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/logger"
 )
+
+var combinedLogger = logger.GetCombinedLogger()
 
 func API() {
 	newRouter := router.NewRouter()
@@ -16,26 +17,24 @@ func API() {
 	serverDev := viper.GetBool("SERVER.SECURITY")
 	if !serverDev {
 		port := viper.GetString("SERVER.PORT")
-		fmt.Printf("Info - HTTP about to listen on %s.", port)
-		log.Printf("Info - HTTP about to listen on %s.", port)
+		combinedLogger.Info("HTTP about to listen on " + port)
 
 		resolve, _ := net.ResolveTCPAddr("tcp4", "0.0.0.0:"+port)
 		resolveTCP, _ := net.ListenTCP("tcp4", resolve)
 
 		errServer := http.Serve(resolveTCP, newRouter)
-		log.Fatal("Error - Startup of API server", errServer)
+		combinedLogger.Fatal("Startup of API server " + errServer.Error())
 	} else {
 		port := viper.GetString("SERVER.PORT")
 		fullchainCert := viper.GetString("SERVER.CERT.FULLCHAIN")
 		privKeyCert := viper.GetString("SERVER.CERT.PK")
 
-		log.Printf("HTTPS about to listen on %s.", port)
-		fmt.Printf("HTTPS about to listen on %s.", port)
+		combinedLogger.Info("HTTPS about to listen on " + port)
 
 		resolve, _ := net.ResolveTCPAddr("tcp4", "0.0.0.0:"+port)
 		resolveTCP, _ := net.ListenTCP("tcp4", resolve)
 
 		errServer := http.ServeTLS(resolveTCP, newRouter, fullchainCert, privKeyCert)
-		log.Fatal("Error - Startup of API server", errServer)
+		combinedLogger.Fatal("Startup of API server " + errServer.Error())
 	}
 }
