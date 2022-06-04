@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -25,65 +26,6 @@ const (
 	PASSWORD_RESET_ALL int = 11
 )
 
-func CheckPermission(userID int, policyID int) (bool, error) {
-	db := DBSystem
-
-	var findUser Users
-
-	errUserQuery := db.Where("id = ?", userID).First(&findUser)
-	if errors.Is(errUserQuery.Error, gorm.ErrRecordNotFound) {
-		return false, ErrUserNotFound
-	} else if errUserQuery != nil {
-		return false, ErrQuery
-	}
-
-	userGroups, userGroupErr := GetAllUserGroups(userID)
-	if userGroupErr != nil {
-		return false, userGroupErr
-	}
-
-	for i := 0; i < len(userGroups); i++ {
-		groupID := userGroups[i].GroupID
-		groupPol, errGroupPol := GetGroupPolicies(groupID)
-		if errGroupPol != nil {
-			return false, errGroupPol
-		}
-
-		for x := 0; x < len(groupPol); x++ {
-			if groupPol[x].PolicyID == policyID {
-				return true, nil
-			}
-		}
-	}
-	return false, nil
-}
-
-func GetAllUserGroups(userID int) ([]UserGroups, error) {
-	db := DBSystem
-	var findUserGroup []UserGroups
-
-	errUserGroupQuery := db.Where("user_id = ?", userID).Find(&findUserGroup)
-	if errors.Is(errUserGroupQuery.Error, gorm.ErrRecordNotFound) {
-		return nil, ErrUserGroupNotFound
-	} else if errUserGroupQuery != nil {
-		return nil, ErrQuery
-	}
-	return findUserGroup, nil
-}
-
-func GetGroupPolicies(groupID int) ([]GroupPolicies, error) {
-	db := DBSystem
-	var findGroupPol []GroupPolicies
-
-	errUserGroupQuery := db.Where("group_id = ?", groupID).Find(&findGroupPol)
-	if errors.Is(errUserGroupQuery.Error, gorm.ErrRecordNotFound) {
-		return nil, ErrGroupPolicyNotFound
-	} else if errUserGroupQuery != nil {
-		return nil, ErrQuery
-	}
-	return findGroupPol, nil
-}
-
 func startupCreation() {
 
 	standardVPNPerms := []int{PERSONAL_KEYS_VIEW, PERSONAL_KEYS_ADD}
@@ -103,7 +45,93 @@ func startupCreation() {
 
 	adminPolicies := []string{"STANDARD_USER_VPN", "STANDARD_USER_SETTINGS", "ADVANCED_USER_VPN", "ADMIN_USER"}
 	AddGroupPolicies("Admin", adminPolicies)
+}
 
+func CheckPermission(userID int, permID int) (bool, error) {
+	//REWORK THIS TRASH FUNCTION
+	db := DBSystem
+	var findUser Users
+
+	errUserQuery := db.Where("id = ?", userID).First(&findUser)
+	if errors.Is(errUserQuery.Error, gorm.ErrRecordNotFound) {
+		return false, ErrUserNotFound
+	} else if errUserQuery.Error != nil {
+		return false, ErrQuery
+	}
+
+	userGroups, userGroupErr := GetAllUserGroups(userID)
+	if userGroupErr != nil {
+		return false, userGroupErr
+	}
+
+	for x := 0; x < len(userGroups); x++ {
+		groupID := userGroups[x].GroupID
+		groupPol, errGroupPol := GetGroupPolicies(groupID)
+		if errGroupPol != nil {
+			return false, errGroupPol
+		}
+
+		for y := 0; y < len(groupPol); y++ {
+			policyID := groupPol[y].PolicyID
+			permsArr, errPerms := GetPermissions(policyID)
+			if errPerms != nil {
+				return false, errPerms
+			}
+			for z := 0; z < len(permsArr); z++ {
+				perm, convErr := strconv.Atoi(permsArr[z])
+				if convErr != nil {
+					return false, convErr
+				}
+				if perm == permID {
+					return true, nil
+				}
+			}
+		}
+	}
+
+	return false, nil
+}
+
+func GetAllUserGroups(userID int) ([]UserGroups, error) {
+	db := DBSystem
+	var findUserGroup []UserGroups
+
+	errUserGroupQuery := db.Where("user_id = ?", userID).Find(&findUserGroup)
+	if errors.Is(errUserGroupQuery.Error, gorm.ErrRecordNotFound) {
+		return nil, ErrUserGroupNotFound
+	} else if errUserGroupQuery.Error != nil {
+		return nil, ErrQuery
+	}
+	return findUserGroup, nil
+}
+
+func GetGroupPolicies(groupID int) ([]GroupPolicies, error) {
+	db := DBSystem
+	var findGroupPol []GroupPolicies
+
+	errUserGroupQuery := db.Where("group_id = ?", groupID).Find(&findGroupPol)
+	if errors.Is(errUserGroupQuery.Error, gorm.ErrRecordNotFound) {
+		return nil, ErrGroupPolicyNotFound
+	} else if errUserGroupQuery.Error != nil {
+		return nil, ErrQuery
+	}
+	return findGroupPol, nil
+}
+
+func GetPermissions(policyID int) ([]string, error) {
+	db := DBSystem
+	var findPolicy Policies
+
+	errPolicyQuery := db.Where("id = ?", policyID).First(&findPolicy)
+	if errors.Is(errPolicyQuery.Error, gorm.ErrRecordNotFound) {
+		return nil, ErrPolicyNotFound
+	} else if errPolicyQuery.Error != nil {
+		return nil, ErrQuery
+	}
+	permsStr := findPolicy.Permissions
+	perms := strings.Split(permsStr, ";")
+	perms = perms[0:(len(perms) - 1)]
+	return perms, nil
 }
 
 func AddPolicy(policyName string, perms []int) error {

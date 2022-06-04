@@ -11,12 +11,14 @@ var (
 	ErrUserExists   = errors.New("user already exists")
 	ErrCreatingUser = errors.New("error creating new user")
 	//User Group
-	ErrUserGroupNotFound = errors.New("user's groups were not found")
+	ErrUserGroupNotFound = errors.New("user's groups was not found")
 	ErrCreatingUserGroup = errors.New("could not create new user group")
 	//Group
 	ErrGroupNotFound = errors.New("group was not found")
 	//GroupPolicy
-	ErrGroupPolicyNotFound = errors.New("group policies were not found")
+	ErrGroupPolicyNotFound = errors.New("group policies was not found")
+	//Policy
+	ErrPolicyNotFound = errors.New("policy was nto found")
 	//Authentication
 	ErrAuthNotFound  = errors.New("authentication was not found")
 	ErrCreatingAuth  = errors.New("error when creating new authentication")
@@ -27,6 +29,8 @@ var (
 
 	//Token
 	ErrCreatingToken = errors.New("error creating token")
+	//Permissions
+	ErrMissingPermission = errors.New("entity does not have permission to perform this function")
 )
 
 // func ErrorCheck(error) error {

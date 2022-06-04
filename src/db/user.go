@@ -70,12 +70,10 @@ func LoginWithUsername(username string, password string) (string, error) {
 		combinedLogger.Error("Finding auth " + authQuery.Error.Error())
 		return "", ErrQuery
 	}
-
 	var passHash Hash
 	if passHash.Compare(findAuth.Password, password) != nil {
 		return "", ErrIncorrectPass
 	}
-
 	userQuery := db.Where("auth_id = ?", findAuth.ID).First(&findUser)
 	if errors.Is(userQuery.Error, gorm.ErrRecordNotFound) {
 		return "", ErrUserNotFound
@@ -83,7 +81,12 @@ func LoginWithUsername(username string, password string) (string, error) {
 		combinedLogger.Error("Finding user " + userQuery.Error.Error())
 		return "", ErrQuery
 	}
-
+	hasPerms, permsErr := CheckPermission(findUser.ID, PERSONAL_LOGIN)
+	if permsErr != nil {
+		return "", permsErr
+	} else if !hasPerms {
+		return "", ErrMissingPermission
+	}
 	tokenLifetime := time.Now().AddDate(0, 0, 7)
 	generatedToken, tokenErr := token.GenerateUser(strconv.Itoa(findUser.ID), tokenLifetime)
 	if tokenErr != nil {
