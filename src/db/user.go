@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"strconv"
 	"time"
 
 	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/token"
@@ -60,17 +59,13 @@ func AddUser(username string, password string, email string) error {
 
 func LoginWithUsername(username string, password string) (string, error) {
 	db := DBSystem
-	var findAuth Authentications
 	var findUser Users
-
-	authQuery := db.Where("username = ?", username).First(&findAuth)
-	if errors.Is(authQuery.Error, gorm.ErrRecordNotFound) {
-		return "", ErrAuthNotFound
-	} else if authQuery.Error != nil {
-		combinedLogger.Error("Finding auth " + authQuery.Error.Error())
-		return "", ErrQuery
-	}
 	var passHash Hash
+
+	findAuth, authErr := FindAuthFromUsername(username)
+	if authErr != nil {
+		return "", authErr
+	}
 	if passHash.Compare(findAuth.Password, password) != nil {
 		return "", ErrIncorrectPass
 	}
@@ -88,7 +83,7 @@ func LoginWithUsername(username string, password string) (string, error) {
 		return "", ErrMissingPermission
 	}
 	tokenLifetime := time.Now().AddDate(0, 0, 7)
-	generatedToken, tokenErr := token.GenerateUser(strconv.Itoa(findUser.ID), tokenLifetime)
+	generatedToken, tokenErr := token.GenerateUser(username, tokenLifetime)
 	if tokenErr != nil {
 		combinedLogger.Error("Generating token " + tokenErr.Error())
 		return "", ErrCreatingToken

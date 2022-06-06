@@ -15,6 +15,9 @@ func NewRouter() *mux.Router {
 	user.HandleFunc("/add", routes.AddUser).Methods("POST")
 	user.HandleFunc("/login", routes.LoginWithUsername).Methods("POST")
 
+	key := router.PathPrefix("/key").Subrouter()
+	key.HandleFunc("/add", routes.AddKey).Methods("GET")
+
 	token := router.PathPrefix("/token").Subrouter()
 	token.HandleFunc("/validate", routes.Validate).Methods("POST")
 
