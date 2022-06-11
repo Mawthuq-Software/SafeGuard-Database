@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router/responses"
@@ -74,6 +75,7 @@ func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
 	}
 	token, dbErr := db.LoginWithUsername(bodyReq.Username, bodyReq.Password)
 	if dbErr != nil {
+		fmt.Println(dbErr)
 		bodyRes.Response = "could not login user"
 		responses.Token(res, bodyRes, http.StatusBadRequest)
 		return

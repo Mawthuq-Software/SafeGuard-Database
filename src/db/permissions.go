@@ -9,21 +9,31 @@ import (
 )
 
 const (
-	//Standard User Permissions
-	PERSONAL_KEYS_VIEW      int = 1
-	PERSONAL_KEYS_ADD       int = 2
-	PERSONAL_KEYS_DELETE    int = 3
-	PERSONAL_KEYS_MODIFY    int = 4
-	PERSONAL_PASSWORD_RESET int = 5
-	PERSONAL_LOGIN          int = 6
+	//1000 for user permissions
+	//2000 for admin permissions
+	//3000 for server permissions
+
+	//User Permissions
+	PERSONAL_KEYS_VIEW         int = 1000
+	PERSONAL_KEYS_ADD          int = 1001
+	PERSONAL_PASSWORD_RESET    int = 1002
+	PERSONAL_LOGIN             int = 1003
+	PERSONAL_SUBSCRIPTION_VIEW int = 1004
+
+	//Advanced User Perms
+	PERSONAL_KEYS_DELETE         int = 1100
+	PERSONAL_KEYS_MODIFY         int = 1101
+	PERSONAL_SUBSCRIPTION_MODIFY int = 1102
 
 	//Admin User Permissions
-	KEYS_VIEW_ALL      int = 7
-	KEYS_ADD_ALL       int = 8
-	KEYS_ADD_OVERRIDE  int = 12
-	KEYS_DELETE_ALL    int = 9
-	KEYS_MODIFY_ALL    int = 10
-	PASSWORD_RESET_ALL int = 11
+	KEYS_VIEW_ALL           int = 2000
+	KEYS_ADD_ALL            int = 2001
+	KEYS_ADD_OVERRIDE       int = 2002
+	KEYS_DELETE_ALL         int = 2003
+	KEYS_MODIFY_ALL         int = 2004
+	PASSWORD_RESET_ALL      int = 2005
+	SUBSCRIPTION_VIEW_ALL   int = 2008
+	SUBSCRIPTION_MODIFY_ALL int = 2007
 )
 
 func startupCreation() {

@@ -17,9 +17,17 @@ func NewRouter() *mux.Router {
 
 	key := router.PathPrefix("/key").Subrouter()
 	key.HandleFunc("/add", routes.AddKey).Methods("GET")
+	key.HandleFunc("/delete", routes.DeleteKey).Methods("GET")
+	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("GET")
+	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("GET")
 
 	token := router.PathPrefix("/token").Subrouter()
-	token.HandleFunc("/validate", routes.Validate).Methods("POST")
+	token.HandleFunc("/validate", routes.Validate).Methods("GET")
+
+	subscription := router.PathPrefix("/subscription").Subrouter()
+	subscription.HandleFunc("/edit", routes.EditingSubscription).Methods("GET")
+	subscription.HandleFunc("/get", routes.GetSubscription).Methods("GET")
+	subscription.HandleFunc("/get-all", routes.GetAllSubscriptions).Methods("GET")
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router
