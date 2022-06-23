@@ -20,9 +20,10 @@ var (
 	//Policy
 	ErrPolicyNotFound = errors.New("policy was nto found")
 	//Authentication
-	ErrAuthNotFound  = errors.New("authentication was not found")
-	ErrCreatingAuth  = errors.New("error when creating new authentication")
-	ErrIncorrectPass = errors.New("password was incorrect")
+	ErrAuthNotFound   = errors.New("authentication was not found")
+	ErrCreatingAuth   = errors.New("error when creating new authentication")
+	ErrIncorrectPass  = errors.New("password was incorrect")
+	ErrSavingPassword = errors.New("error when saving user password")
 
 	//Hashing
 	ErrHashing = errors.New("error when hashing")

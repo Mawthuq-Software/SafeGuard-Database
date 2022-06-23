@@ -58,8 +58,6 @@ func AddUser(username string, password string, email string) error {
 }
 
 func LoginWithUsername(username string, password string) (string, error) {
-	db := DBSystem
-	var findUser Users
 	var passHash Hash
 
 	findAuth, authErr := FindAuthFromUsername(username)
@@ -69,14 +67,12 @@ func LoginWithUsername(username string, password string) (string, error) {
 	if passHash.Compare(findAuth.Password, password) != nil {
 		return "", ErrIncorrectPass
 	}
-	userQuery := db.Where("auth_id = ?", findAuth.ID).First(&findUser)
-	if errors.Is(userQuery.Error, gorm.ErrRecordNotFound) {
-		return "", ErrUserNotFound
-	} else if userQuery.Error != nil {
-		combinedLogger.Error("Finding user " + userQuery.Error.Error())
-		return "", ErrQuery
+
+	userQuery, userErr := FindUserFromAuthID(findAuth.ID)
+	if userErr != nil {
+		return "", userErr
 	}
-	hasPerms, permsErr := CheckPermission(findUser.ID, PERSONAL_LOGIN)
+	hasPerms, permsErr := CheckPermission(userQuery.ID, PERSONAL_LOGIN)
 	if permsErr != nil {
 		return "", permsErr
 	} else if !hasPerms {
@@ -89,6 +85,32 @@ func LoginWithUsername(username string, password string) (string, error) {
 		return "", ErrCreatingToken
 	}
 	return generatedToken, nil
+}
+
+func ChangeUserPassword(username string, oldPassword string, newPassword string) error {
+	db := DBSystem
+
+	var passHash Hash
+	findAuth, authErr := FindAuthFromUsername(username)
+	if authErr != nil {
+		return authErr
+	}
+	if passHash.Compare(findAuth.Password, oldPassword) != nil {
+		return ErrIncorrectPass
+	}
+
+	hashedPassword, hashErr := passHash.Generate(newPassword)
+	if hashErr != nil {
+		combinedLogger.Error("Hashing password " + hashErr.Error())
+		return ErrHashing
+	}
+
+	findAuth.Password = hashedPassword
+	hashSave := db.Save(&findAuth)
+	if hashSave.Error != nil {
+		return ErrSavingPassword
+	}
+	return nil
 }
 
 //https://hackernoon.com/how-to-store-passwords-example-in-go-62712b1d2212

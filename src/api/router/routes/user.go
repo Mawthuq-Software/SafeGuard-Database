@@ -17,6 +17,11 @@ type User struct {
 	AccessToken string `json:"accessToken"`
 }
 
+type UserPasswordChange struct {
+	User
+	NewPassword string `json:"newPassword"`
+}
+
 func AddUser(res http.ResponseWriter, req *http.Request) {
 	var bodyReq User
 	bodyRes := responses.StandardResponse{}
@@ -83,4 +88,39 @@ func LoginWithUsername(res http.ResponseWriter, req *http.Request) {
 	bodyRes.Token = token
 	bodyRes.Response = "successfully created token"
 	responses.Token(res, bodyRes, http.StatusAccepted)
+}
+
+func ChangeUserPassword(res http.ResponseWriter, req *http.Request) {
+	var bodyReq UserPasswordChange
+	bodyRes := responses.StandardResponse{}
+
+	err := ParseRequest(req, &bodyReq)
+	if err != nil {
+		combinedLogger.Error("Parsing request " + err.Error())
+		bodyRes.Response = "Error parsing request"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	if bodyReq.Username == "" {
+		bodyRes.Response = "username cannot be blank"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if bodyReq.Password == "" {
+		bodyRes.Response = "password cannot be blank"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if bodyReq.NewPassword == "" {
+		bodyRes.Response = "new password cannot be blank"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	passErr := db.ChangeUserPassword(bodyReq.Username, bodyReq.Password, bodyReq.NewPassword)
+	if passErr != nil {
+		bodyRes.Response = "there was an issue changing the password"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "password changed successfully"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }

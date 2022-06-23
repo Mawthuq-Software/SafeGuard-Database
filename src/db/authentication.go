@@ -19,3 +19,18 @@ func FindAuthFromUsername(username string) (Authentications, error) {
 	}
 	return findAuth, nil
 }
+
+func FindUserFromAuthID(authID int) (Users, error) {
+	db := DBSystem
+	var findUser Users
+
+	userQuery := db.Where("auth_id = ?", authID).First(&findUser)
+	if errors.Is(userQuery.Error, gorm.ErrRecordNotFound) {
+		return findUser, ErrUserNotFound
+	} else if userQuery.Error != nil {
+		combinedLogger.Error("Finding user " + userQuery.Error.Error())
+		return findUser, ErrQuery
+	}
+
+	return findUser, nil
+}

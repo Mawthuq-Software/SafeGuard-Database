@@ -56,6 +56,13 @@ type Servers struct {
 	IPAddress  string
 	Online     bool
 	LastOnline time.Time
-	// GroupID    int
-	// Groups     Groups `gorm:"foreignKey:GroupID"`
+}
+
+type Keys struct {
+	StandardModel
+	ServerID       int
+	Servers        Servers `gorm:"foreignKey:ServerID"`
+	ServerKeyID    int     `gorm:"unqiue"`
+	UsedBandwidth  int
+	TotalBandwidth int
 }
