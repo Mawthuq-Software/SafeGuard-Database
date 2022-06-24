@@ -48,6 +48,25 @@ type Users struct {
 	Authentications Authentications `gorm:"foreignKey:AuthID"`
 }
 
+type UserKeys struct {
+	StandardModel
+	UserID int
+	Users  Users `gorm:"foreignKey:UserID"`
+	KeyID  int
+	Keys   Keys `gorm:"foreignKey:KeyID"`
+}
+
+type Keys struct {
+	StandardModel
+	ServerID       int
+	Servers        Servers `gorm:"foreignKey:ServerID"`
+	ServerKeyID    int     `gorm:"unqiue"`
+	UsedBandwidth  int
+	TotalBandwidth int
+	PublicKey      string
+	PresharedKey   string
+}
+
 type Servers struct {
 	StandardModel
 	Name       string `gorm:"unique"`
@@ -58,11 +77,70 @@ type Servers struct {
 	LastOnline time.Time
 }
 
-type Keys struct {
+type KeyIPv4 struct {
 	StandardModel
-	ServerID       int
-	Servers        Servers `gorm:"foreignKey:ServerID"`
-	ServerKeyID    int     `gorm:"unqiue"`
-	UsedBandwidth  int
-	TotalBandwidth int
+	KeyID  int
+	Keys   Keys `gorm:"foreignKey:KeyID"`
+	IPv4ID int
+	IPv4   IPv4 `gorm:"foreignKey:IPv4ID"`
+}
+
+type IPv4 struct {
+	StandardModel
+	Address string
+}
+
+type IPv4Interfaces struct {
+	StandardModel
+	InterfaceID         int
+	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
+	IPv4ID              int
+	IPv4                IPv4 `gorm:"foreignKey:IPv4ID"`
+}
+
+type KeyIPv6 struct {
+	StandardModel
+	KeyID  int
+	Keys   Keys `gorm:"foreignKey:KeyID"`
+	IPv6ID int
+	IPv6   IPv6 `gorm:"foreignKey:IPv6ID"`
+}
+
+type IPv6 struct {
+	StandardModel
+	Address string
+}
+
+type IPv6Interfaces struct {
+	StandardModel
+	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
+	IPv6ID              int
+	IPv6                IPv6 `gorm:"foreignKey:IPv6ID"`
+}
+
+type WireguardInterfaces struct {
+	StandardModel
+	ListenPort int
+	PublicKey  string
+}
+
+type ServerInterfaces struct {
+	StandardModel
+	ServerID            int
+	Servers             Servers `gorm:"foreignKey:ServerID"`
+	InterfaceID         int
+	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
+}
+
+type ServerTokens struct {
+	StandardModel
+	ServerID int
+	Servers  Servers `gorm:"foreignKey:ServerID"`
+	TokenID  int
+	Tokens   Tokens `gorm:"foreignKey:TokenID"`
+}
+
+type Tokens struct {
+	StandardModel
+	AccessToken string `gorm:"unique"`
 }
