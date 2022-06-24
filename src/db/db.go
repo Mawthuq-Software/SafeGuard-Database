@@ -35,7 +35,7 @@ func DBStart() {
 	DBSystem = db //set global variable up
 
 	// Migrate the schema
-	errMigrate := db.AutoMigrate(&Policies{}, &Groups{}, &GroupPolicies{}, &Authentications{}, &Users{}, &Servers{}, &UserGroups{}) //Migrate tables to sqlite
+	errMigrate := db.AutoMigrate(&Policies{}, &Groups{}, &GroupPolicies{}, &Authentications{}, &UserGroups{}, &Users{}, &Servers{}, &UserKeys{}) //Migrate tables to sqlite
 	if errMigrate != nil {
 		combinedLogger.Fatal("Migrating database " + errMigrate.Error())
 	} else {

@@ -79,13 +79,18 @@ type Servers struct {
 
 type KeyIPv4 struct {
 	StandardModel
-	KeyID  int
-	Keys   Keys `gorm:"foreignKey:KeyID"`
-	IPv4ID int
-	IPv4   IPv4 `gorm:"foreignKey:IPv4ID"`
+	KeyID       int
+	Keys        Keys `gorm:"foreignKey:KeyID"`
+	IPv4ID      int
+	PrivateIPv4 PrivateIPv4 `gorm:"foreignKey:IPv4ID"`
 }
 
-type IPv4 struct {
+type PublicIPv4 struct {
+	StandardModel
+	Address string
+}
+
+type PrivateIPv4 struct {
 	StandardModel
 	Address string
 }
@@ -95,18 +100,23 @@ type IPv4Interfaces struct {
 	InterfaceID         int
 	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
 	IPv4ID              int
-	IPv4                IPv4 `gorm:"foreignKey:IPv4ID"`
+	PublicIPv4          PublicIPv4 `gorm:"foreignKey:IPv4ID"`
 }
 
 type KeyIPv6 struct {
 	StandardModel
-	KeyID  int
-	Keys   Keys `gorm:"foreignKey:KeyID"`
-	IPv6ID int
-	IPv6   IPv6 `gorm:"foreignKey:IPv6ID"`
+	KeyID       int
+	Keys        Keys `gorm:"foreignKey:KeyID"`
+	IPv6ID      int
+	PrivateIPv6 PrivateIPv6 `gorm:"foreignKey:IPv6ID"`
 }
 
-type IPv6 struct {
+type PublicIPv6 struct {
+	StandardModel
+	Address string
+}
+
+type PrivateIPv6 struct {
 	StandardModel
 	Address string
 }
@@ -115,7 +125,7 @@ type IPv6Interfaces struct {
 	StandardModel
 	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
 	IPv6ID              int
-	IPv6                IPv6 `gorm:"foreignKey:IPv6ID"`
+	PublicIPv6          PublicIPv6 `gorm:"foreignKey:IPv6ID"`
 }
 
 type WireguardInterfaces struct {
@@ -143,4 +153,37 @@ type ServerTokens struct {
 type Tokens struct {
 	StandardModel
 	AccessToken string `gorm:"unique"`
+}
+
+type ServerConfigurations struct {
+	StandardModel
+	ServerID       int
+	Servers        Servers `gorm:"foreignKey:ServerID"`
+	ConfigID       int
+	Configurations Configurations `gorm:"foreignKey:ConfigID"`
+}
+
+type Configurations struct {
+	StandardModel
+	DNS string
+}
+
+type ConfigSubnets struct {
+	StandardModel
+	ConfigID       int
+	Configurations Configurations `gorm:"foreignKey:ConfigID"`
+	SubnetID       int
+	Subnets        Subnets `gorm:"foreignKey:SubnetID"`
+}
+
+type Subnets struct {
+	StandardModel
+	Mask int
+}
+
+type Subscriptions struct {
+	StandardModel
+	Name           string
+	NumberOfKeys   int
+	TotalBandwidth int
 }

@@ -6,6 +6,30 @@ import (
 	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/db"
 )
 
+type Key struct {
+	ID       int `json:"id"`
+	ServerID int `json:"serverID"`
+}
+
+type KeyPreshared struct {
+	PresharedKey string `json:"presharedKey"`
+}
+
+type KeyPublic struct {
+	PublicKey string `json:"publicKey"`
+}
+
+type KeyAdd struct {
+	Key
+	KeyPreshared
+	KeyPublic
+}
+
+type KeyGetInfo struct {
+	Key
+	KeyPublic
+}
+
 func AddKey(res http.ResponseWriter, req *http.Request) {
 	perms := []int{db.PERSONAL_KEYS_ADD, db.KEYS_ADD_ALL}
 	ValidatePerms(res, req, perms)
