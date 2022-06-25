@@ -3,7 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/db"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
 )
 
 type Key struct {
@@ -31,8 +32,10 @@ type KeyGetInfo struct {
 }
 
 func AddKey(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_ADD, db.KEYS_ADD_ALL}
-	ValidatePerms(res, req, perms)
+	validErr := db.ValidateUserPerms(bearerToken, perms)
 }
 
 func DeleteKey(res http.ResponseWriter, req *http.Request) {
