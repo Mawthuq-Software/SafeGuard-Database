@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router/responses"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/db"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
 )
 
 type User struct {

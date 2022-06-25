@@ -187,3 +187,11 @@ type Subscriptions struct {
 	NumberOfKeys   int
 	TotalBandwidth int
 }
+
+type UserSubscriptions struct {
+	StandardModel
+	UserID         int
+	Users          Users `gorm:"foreignKey:UserID"`
+	SubscriptionID int
+	Subscriptions  Subscriptions `gorm:"foreignKey:SubscriptionID"`
+}

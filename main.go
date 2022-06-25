@@ -1,10 +1,10 @@
 package main
 
 import (
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/config"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/db"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/logger"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/config"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/logger"
 )
 
 func main() {

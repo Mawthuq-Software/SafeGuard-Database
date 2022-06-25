@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router/responses"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router/routes"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/routes"
 )
 
 var url = "https://eu1.raspberrytech.one:8446"

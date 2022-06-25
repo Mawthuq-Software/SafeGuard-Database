@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/db"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
 )
 
 func EditingSubscription(res http.ResponseWriter, req *http.Request) {

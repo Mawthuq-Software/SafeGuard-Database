@@ -28,10 +28,14 @@ var (
 	//Hashing
 	ErrHashing = errors.New("error when hashing")
 
-	//Token
+	//Token or Bearer
 	ErrCreatingToken = errors.New("error creating token")
+	ErrBearerEmpty   = errors.New("bearer token is empty")
+	ErrBearerInvalid = errors.New("bearer token is invalid")
+
 	//Permissions
-	ErrMissingPermission = errors.New("entity does not have permission to perform this function")
+	ErrMissingPermission     = errors.New("entity does not have permission to perform this function")
+	ErrInvalidUserPermission = errors.New("user does not have valid permission")
 )
 
 // func ErrorCheck(error) error {

@@ -3,8 +3,8 @@ package db
 import (
 	"os"
 
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/logger"
 	"github.com/spf13/viper"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -35,7 +35,16 @@ func DBStart() {
 	DBSystem = db //set global variable up
 
 	// Migrate the schema
-	errMigrate := db.AutoMigrate(&Policies{}, &Groups{}, &GroupPolicies{}, &Authentications{}, &UserGroups{}, &Users{}, &Servers{}, &UserKeys{}) //Migrate tables to sqlite
+	errMigrate := db.AutoMigrate(
+		&Policies{}, &Groups{}, &GroupPolicies{},
+		&Authentications{}, &UserGroups{}, &Users{},
+		&UserKeys{}, &Keys{}, &Servers{},
+		&KeyIPv4{}, &PublicIPv4{}, &PrivateIPv4{},
+		&IPv4Interfaces{}, &KeyIPv6{}, &PublicIPv6{},
+		&PrivateIPv6{}, &IPv6Interfaces{}, &WireguardInterfaces{},
+		&ServerInterfaces{}, &ServerTokens{}, &Tokens{},
+		&ServerConfigurations{}, &Configurations{}, &ConfigSubnets{},
+		&Subnets{}, &Subscriptions{}, &UserSubscriptions{}) //Migrate tables to sqlite
 	if errMigrate != nil {
 		combinedLogger.Fatal("Migrating database " + errMigrate.Error())
 	} else {

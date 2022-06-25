@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/token"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/token"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/routes"
 	"github.com/gorilla/mux"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router/routes"
 )
 
 func NewRouter() *mux.Router {

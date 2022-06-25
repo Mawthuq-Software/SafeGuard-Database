@@ -1,4 +1,4 @@
-module gitlab.com/mawthuq-software/wireguard-manager-authenticator
+module github.com/Mawthuq-Software/Wireguard-Central-Node
 
 go 1.18
 

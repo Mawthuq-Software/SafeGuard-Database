@@ -4,9 +4,9 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router"
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/logger"
 	"github.com/spf13/viper"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/api/router"
-	"gitlab.com/mawthuq-software/wireguard-manager-authenticator/src/logger"
 )
 
 var combinedLogger = logger.GetCombinedLogger()
