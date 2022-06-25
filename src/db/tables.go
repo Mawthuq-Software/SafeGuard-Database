@@ -123,6 +123,7 @@ type PrivateIPv6 struct {
 
 type IPv6Interfaces struct {
 	StandardModel
+	InterfaceID         int
 	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
 	IPv6ID              int
 	PublicIPv6          PublicIPv6 `gorm:"foreignKey:IPv6ID"`

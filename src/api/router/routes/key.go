@@ -36,19 +36,48 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_ADD, db.KEYS_ADD_ALL}
 	validErr := db.ValidateUserPerms(bearerToken, perms)
+	if validErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+	}
+	//ADD LOGIC
 }
 
 func DeleteKey(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_DELETE, db.KEYS_DELETE_ALL}
-	ValidatePerms(res, req, perms)
+
+	validErr := db.ValidateUserPerms(bearerToken, perms)
+	if validErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+	}
+	//ADD LOGIC
 }
 
 func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_MODIFY, db.KEYS_MODIFY_ALL}
-	ValidatePerms(res, req, perms)
+
+	validErr := db.ValidateUserPerms(bearerToken, perms)
+	if validErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+	}
+	//ADD LOGIC
 }
 
 func GetAllKeys(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.KEYS_VIEW_ALL}
-	ValidatePerms(res, req, perms)
+
+	validErr := db.ValidateUserPerms(bearerToken, perms)
+	if validErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+	}
+	//ADD LOGIC
 }
