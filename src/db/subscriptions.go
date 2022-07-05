@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -11,7 +12,7 @@ func getUserSubscriptionFromUserID(userID int) (userSubscription UserSubscriptio
 	db := DBSystem
 
 	findUserSub := db.Where("user_id = ?", userID).First(&userSubscription)
-	if !errors.Is(findUserSub.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(findUserSub.Error, gorm.ErrRecordNotFound) {
 		err = ErrUserSubscriptionNotFound
 	} else if findUserSub.Error != nil {
 		err = ErrQuery
@@ -24,7 +25,7 @@ func getSubscription(subscriptionID int) (subscription Subscriptions, err error)
 	db := DBSystem
 
 	findSub := db.Where("id = ?", subscriptionID).First(&subscription)
-	if !errors.Is(findSub.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(findSub.Error, gorm.ErrRecordNotFound) {
 		err = ErrSubscriptionNotFound
 		return
 	} else if findSub.Error != nil {
@@ -37,9 +38,10 @@ func getSubscription(subscriptionID int) (subscription Subscriptions, err error)
 func checkSubscriptionKeyAddition(userID int) (err error) {
 	userSubscription, err := getUserSubscriptionFromUserID(userID)
 	if err != nil {
+		fmt.Println(err)
+
 		return
 	}
-
 	if userSubscription.Expiry.After(time.Now()) {
 		err = ErrSubscriptionExpired
 		return

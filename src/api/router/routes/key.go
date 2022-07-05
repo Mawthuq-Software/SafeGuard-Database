@@ -41,6 +41,7 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
 	}
 
 	err := ParseRequest(req, &bodyReq)
@@ -70,11 +71,13 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
 	}
 	err = db.AddUserKey(user.ID, bodyReq.ServerID, bodyReq.PublicKey, bodyReq.PresharedKey)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
 	}
 	bodyRes.Response = "added key successfully"
 	responses.Standard(res, bodyRes, http.StatusBadRequest)

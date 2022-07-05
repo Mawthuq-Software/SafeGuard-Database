@@ -11,8 +11,11 @@ func addKey(serverID int, publicKey string, presharedKey string) (keyID int, err
 	var serverSearch Servers
 	db := DBSystem
 	findServer := db.Where("serverID = ?", serverID).First(&serverSearch)
-	if !errors.Is(findServer.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(findServer.Error, gorm.ErrRecordNotFound) {
 		err = ErrServerNotFound
+		return
+	} else if findServer.Error != nil {
+		err = ErrQuery
 		return
 	}
 

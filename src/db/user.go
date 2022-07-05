@@ -16,7 +16,7 @@ func AddUser(username string, password string, email string) error {
 	db := DBSystem
 
 	findAuth := db.Where("username = ?", username).Or("email = ?", email).First(&userAuthStruct) //find authentication in database
-	if !errors.Is(findAuth.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(findAuth.Error, gorm.ErrRecordNotFound) {
 		return ErrUserExists
 	}
 
