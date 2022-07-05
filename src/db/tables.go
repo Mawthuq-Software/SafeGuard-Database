@@ -60,7 +60,6 @@ type Keys struct {
 	StandardModel
 	ServerID       int
 	Servers        Servers `gorm:"foreignKey:ServerID"`
-	ServerKeyID    int     `gorm:"unqiue"`
 	UsedBandwidth  int
 	TotalBandwidth int
 	PublicKey      string
@@ -195,4 +194,6 @@ type UserSubscriptions struct {
 	Users          Users `gorm:"foreignKey:UserID"`
 	SubscriptionID int
 	Subscriptions  Subscriptions `gorm:"foreignKey:SubscriptionID"`
+	UsedBandwidth  int
+	Expiry         time.Time
 }

@@ -10,9 +10,15 @@ var (
 	ErrUserNotFound = errors.New("user was not found")
 	ErrUserExists   = errors.New("user already exists")
 	ErrCreatingUser = errors.New("error creating new user")
-	//User Group
+	//UserGroup
 	ErrUserGroupNotFound = errors.New("user's groups was not found")
 	ErrCreatingUserGroup = errors.New("could not create new user group")
+	//UserSubscription
+	ErrUserSubscriptionNotFound = errors.New("user does not have subscription")
+	//Subscription
+	ErrSubscriptionNotFound = errors.New("subscription was not found")
+	ErrSubscriptionExpired  = errors.New("subscription has expired")
+	ErrSubscriptionKeyMaxed = errors.New("user has maxed out all available keys")
 	//Group
 	ErrGroupNotFound = errors.New("group was not found")
 	//GroupPolicy
@@ -24,18 +30,25 @@ var (
 	ErrCreatingAuth   = errors.New("error when creating new authentication")
 	ErrIncorrectPass  = errors.New("password was incorrect")
 	ErrSavingPassword = errors.New("error when saving user password")
-
 	//Hashing
 	ErrHashing = errors.New("error when hashing")
-
 	//Token or Bearer
 	ErrCreatingToken = errors.New("error creating token")
 	ErrBearerEmpty   = errors.New("bearer token is empty")
 	ErrBearerInvalid = errors.New("bearer token is invalid")
-
 	//Permissions
 	ErrMissingPermission     = errors.New("entity does not have permission to perform this function")
 	ErrInvalidUserPermission = errors.New("user does not have valid permission")
+	//Server
+	ErrServerNotFound = errors.New("server not found")
+	//Key
+	ErrCreatingKey               = errors.New("issue creating key in database")
+	ErrPublicKeyIncorrectForm    = errors.New("public key is not in the correct form")
+	ErrPresharedKeyIncorrectForm = errors.New("preshared key is not in the correct form")
+	ErrKeyNotFound               = errors.New("key was not found")
+	//UserKey
+	ErrUserKeyNotFound = errors.New("user's keys were not found")
+	ErrUserKey         = errors.New("error creating user key link")
 )
 
 // func ErrorCheck(error) error {

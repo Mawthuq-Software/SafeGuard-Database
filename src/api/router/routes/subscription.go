@@ -12,7 +12,7 @@ func EditingSubscription(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_SUBSCRIPTION_MODIFY, db.SUBSCRIPTION_MODIFY_ALL}
 
-	validErr := db.ValidateUserPerms(bearerToken, perms)
+	_, validErr := db.ValidateUserPerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -25,7 +25,7 @@ func GetSubscription(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_SUBSCRIPTION_VIEW, db.SUBSCRIPTION_VIEW_ALL}
 
-	validErr := db.ValidateUserPerms(bearerToken, perms)
+	_, validErr := db.ValidateUserPerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -38,7 +38,7 @@ func GetAllSubscriptions(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.SUBSCRIPTION_VIEW_ALL}
 
-	validErr := db.ValidateUserPerms(bearerToken, perms)
+	_, validErr := db.ValidateUserPerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

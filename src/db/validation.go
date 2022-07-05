@@ -2,23 +2,26 @@ package db
 
 import "github.com/Mawthuq-Software/Wireguard-Central-Node/src/token"
 
-func ValidateUserPerms(bearerToken string, perms []int) error {
+func ValidateUserPerms(bearerToken string, perms []int) (username string, err error) {
 	if bearerToken == "" {
-		return ErrBearerEmpty
+		return "", ErrBearerEmpty
 	}
 	username, tokenErr := token.ValidateUser(bearerToken)
 	if tokenErr != nil {
-		return ErrBearerInvalid
+		err = ErrBearerInvalid
+		return
 	}
 	user, userErr := FindAuthFromUsername(username)
 	if userErr != nil {
-		return userErr
+		err = userErr
+		return
 	}
 	userHasPerm := false
 	for i := 0; i < len(perms); i++ {
 		hasPerms, permErr := CheckPermission(user.ID, perms[i])
 		if permErr != nil {
-			return permErr
+			err = permErr
+			return
 		}
 		if hasPerms {
 			userHasPerm = true
@@ -26,8 +29,8 @@ func ValidateUserPerms(bearerToken string, perms []int) error {
 		}
 	}
 	if !userHasPerm {
-		return ErrInvalidUserPermission
+		err = ErrInvalidUserPermission
+		return
 	}
-
-	return nil
+	return
 }
