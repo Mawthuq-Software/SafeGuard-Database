@@ -7,15 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// Adds a key to the database and returns the keyID
 func addKey(serverID int, publicKey string, presharedKey string) (keyID int, err error) {
-	var serverSearch Servers
 	db := DBSystem
-	findServer := db.Where("serverID = ?", serverID).First(&serverSearch)
-	if errors.Is(findServer.Error, gorm.ErrRecordNotFound) {
-		err = ErrServerNotFound
-		return
-	} else if findServer.Error != nil {
-		err = ErrQuery
+	_, err = findServerFromServerID(serverID)
+	if err != nil {
 		return
 	}
 
@@ -41,6 +37,21 @@ func addKey(serverID int, publicKey string, presharedKey string) (keyID int, err
 	return
 }
 
+func deleteKey(keyID int) (err error) {
+	db := DBSystem
+
+	keyQuery, err := findKeyFromKeyID(keyID)
+	if err != nil {
+		return
+	}
+
+	keyDelete := db.Delete(&keyQuery)
+	if keyDelete.Error != nil {
+		err = ErrDeletingKey
+	}
+	return
+}
+
 func addUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	db := DBSystem
 
@@ -55,10 +66,24 @@ func addUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	userKey := UserKeys{UserID: userID, KeyID: keyID}
 	userKeyCreation := db.Create(&userKey)
 	if userKeyCreation.Error != nil {
-		err = ErrUserKey
+		err = ErrUserKeyLink
 		return
 	}
 	userKeyID = userKey.ID
+	return
+}
+
+func deleteUserKeyLink(keyID int) (err error) {
+	db := DBSystem
+
+	userKey, err := findUserKeysFromKeyID(keyID)
+	if err != nil {
+		return
+	}
+	userKeyDelete := db.Delete(&userKey)
+	if userKeyDelete.Error != nil {
+		err = ErrDeletingUserKey
+	}
 	return
 }
 
@@ -71,6 +96,31 @@ func findKeyFromKeyID(keyID int) (key Keys, err error) {
 	} else if keyQuery.Error != nil {
 		combinedLogger.Error("Finding key " + keyQuery.Error.Error())
 		err = ErrQuery
+	}
+	return
+}
+
+func findUserKeysFromKeyID(keyID int) (userKeys UserKeys, err error) {
+	db := DBSystem
+
+	keyQuery := db.Where("id = ?", keyID).First(&userKeys)
+	if errors.Is(keyQuery.Error, gorm.ErrRecordNotFound) {
+		err = ErrUserKeyNotFound
+	} else if keyQuery.Error != nil {
+		combinedLogger.Error("Finding user key " + keyQuery.Error.Error())
+		err = ErrQuery
+	}
+	return
+}
+
+func findUserKeys(userID int) (userKeys []UserKeys, err error) {
+	db := DBSystem
+	userKeysQuery := db.Where("user_id = ?", userID).Find(&userKeys)
+	if !errors.Is(userKeysQuery.Error, gorm.ErrRecordNotFound) {
+		err = ErrSubscriptionNotFound
+		return
+	} else if userKeysQuery.Error != nil {
+		return
 	}
 	return
 }
@@ -95,20 +145,17 @@ func AddUserKey(userID int, serverID int, publicKey string, presharedKey string)
 		return
 	}
 	_, err = addUserKeyLink(userID, keyID)
-	if err != nil {
-		return
-	}
+	// if err != nil {
+	// 	return
+	// }
 	return
 }
 
-func findUserKeys(userID int) (userKeys []UserKeys, err error) {
-	db := DBSystem
-	userKeysQuery := db.Where("user_id = ?", userID).Find(&userKeys)
-	if !errors.Is(userKeysQuery.Error, gorm.ErrRecordNotFound) {
-		err = ErrSubscriptionNotFound
-		return
-	} else if userKeysQuery.Error != nil {
+func DeleteUserKey(keyID int) (err error) {
+	err = deleteUserKeyLink(keyID)
+	if err != nil {
 		return
 	}
+	err = deleteKey(keyID)
 	return
 }

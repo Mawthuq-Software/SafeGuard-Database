@@ -8,7 +8,7 @@ import (
 )
 
 type Key struct {
-	ID       int `json:"id"`
+	ID       int `json:"keyID"`
 	ServerID int `json:"serverID"`
 }
 
@@ -24,6 +24,10 @@ type KeyAdd struct {
 	Key
 	KeyPreshared
 	KeyPublic
+}
+
+type KeyDelete struct {
+	Key
 }
 
 type KeyGetInfo struct {
@@ -84,7 +88,9 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteKey(res http.ResponseWriter, req *http.Request) {
+	var bodyReq KeyDelete
 	bodyRes := responses.StandardResponse{}
+
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_DELETE, db.KEYS_DELETE_ALL}
 
@@ -92,8 +98,22 @@ func DeleteKey(res http.ResponseWriter, req *http.Request) {
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
 	}
-	//ADD LOGIC
+
+	if bodyReq.ID <= 0 {
+		bodyRes.Response = "client keyID cannot be empty"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	err := db.DeleteUserKey(bodyReq.ID)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "deleted key successfully"
+	responses.Standard(res, bodyRes, http.StatusBadRequest)
 }
 
 func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
@@ -119,5 +139,6 @@ func GetAllKeys(res http.ResponseWriter, req *http.Request) {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 	}
+
 	//ADD LOGIC
 }

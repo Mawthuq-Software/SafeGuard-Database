@@ -43,12 +43,14 @@ var (
 	ErrServerNotFound = errors.New("server not found")
 	//Key
 	ErrCreatingKey               = errors.New("issue creating key in database")
+	ErrDeletingKey               = errors.New("error deleting key from database")
 	ErrPublicKeyIncorrectForm    = errors.New("public key is not in the correct form")
 	ErrPresharedKeyIncorrectForm = errors.New("preshared key is not in the correct form")
 	ErrKeyNotFound               = errors.New("key was not found")
 	//UserKey
 	ErrUserKeyNotFound = errors.New("user's keys were not found")
-	ErrUserKey         = errors.New("error creating user key link")
+	ErrUserKeyLink     = errors.New("error creating user key link")
+	ErrDeletingUserKey = errors.New("error deleting user key link")
 )
 
 // func ErrorCheck(error) error {
