@@ -37,6 +37,7 @@ func addKey(serverID int, publicKey string, presharedKey string) (keyID int, err
 	return
 }
 
+//Deletes a key from keyID
 func deleteKey(keyID int) (err error) {
 	db := DBSystem
 
@@ -52,6 +53,7 @@ func deleteKey(keyID int) (err error) {
 	return
 }
 
+//Adds a link between the userID and keyID in userKey table
 func addUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	db := DBSystem
 
@@ -73,6 +75,7 @@ func addUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	return
 }
 
+//Deletes a link between a user and key
 func deleteUserKeyLink(keyID int) (err error) {
 	db := DBSystem
 
@@ -87,6 +90,7 @@ func deleteUserKeyLink(keyID int) (err error) {
 	return
 }
 
+//finds a key object from a keyID
 func findKeyFromKeyID(keyID int) (key Keys, err error) {
 	db := DBSystem
 
@@ -100,6 +104,7 @@ func findKeyFromKeyID(keyID int) (key Keys, err error) {
 	return
 }
 
+//finds a user key link from the keyID
 func findUserKeysFromKeyID(keyID int) (userKeys UserKeys, err error) {
 	db := DBSystem
 
@@ -113,6 +118,7 @@ func findUserKeysFromKeyID(keyID int) (userKeys UserKeys, err error) {
 	return
 }
 
+//finds all the user's keys from their userID
 func findUserKeys(userID int) (userKeys []UserKeys, err error) {
 	db := DBSystem
 	userKeysQuery := db.Where("user_id = ?", userID).Find(&userKeys)
@@ -125,11 +131,20 @@ func findUserKeys(userID int) (userKeys []UserKeys, err error) {
 	return
 }
 
+//checks to see if wireguard key is appropriate
 func checkKeyValidity(key string) (err error) {
 	_, err = wgmanager.ParseKey(key) //parse string
 	if err != nil {
 		err = ErrPublicKeyIncorrectForm
 	}
+	return
+}
+
+//updates a key object
+func updateKey(key Keys) (err error) {
+	db := DBSystem
+
+	err = db.Save(&key).Error
 	return
 }
 
@@ -151,11 +166,24 @@ func AddUserKey(userID int, serverID int, publicKey string, presharedKey string)
 	return
 }
 
+//Deletes a user's key
 func DeleteUserKey(keyID int) (err error) {
 	err = deleteUserKeyLink(keyID)
 	if err != nil {
 		return
 	}
 	err = deleteKey(keyID)
+	return
+}
+
+//Toggles a key usability from true to false and viceversa
+func ToggleKey(keyID int) (err error) {
+	key, err := findKeyFromKeyID(keyID)
+	if err != nil {
+		return
+	}
+
+	key.Enabled = !key.Enabled
+	err = updateKey(key)
 	return
 }

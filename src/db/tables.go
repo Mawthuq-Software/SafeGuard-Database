@@ -64,6 +64,7 @@ type Keys struct {
 	TotalBandwidth int
 	PublicKey      string
 	PresharedKey   string
+	Enabled        bool
 }
 
 type Servers struct {

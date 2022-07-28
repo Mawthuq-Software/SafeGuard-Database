@@ -117,6 +117,7 @@ func DeleteKey(res http.ResponseWriter, req *http.Request) {
 }
 
 func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
+	var bodyReq Key
 	bodyRes := responses.StandardResponse{}
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_MODIFY, db.KEYS_MODIFY_ALL}
@@ -126,7 +127,21 @@ func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 	}
-	//ADD LOGIC
+
+	if bodyReq.ID <= 0 {
+		bodyRes.Response = "client keyID cannot be empty"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	err := db.ToggleKey(bodyReq.ID)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "toggled key successfully"
+	responses.Standard(res, bodyRes, http.StatusBadRequest)
 }
 
 func GetAllKeys(res http.ResponseWriter, req *http.Request) {
