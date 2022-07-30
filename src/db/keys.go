@@ -148,6 +148,15 @@ func updateKey(key Keys) (err error) {
 	return
 }
 
+//gets all keys in database
+func getAll() (keys []Keys, err error) {
+	db := DBSystem
+
+	dbResult := db.Find(&keys)
+	err = dbResult.Error
+	return keys, err
+}
+
 //Adds a user's key after checking their subscription validity
 func AddUserKey(userID int, serverID int, publicKey string, presharedKey string) (err error) {
 	err = checkSubscriptionKeyAddition(userID)
@@ -160,9 +169,6 @@ func AddUserKey(userID int, serverID int, publicKey string, presharedKey string)
 		return
 	}
 	_, err = addUserKeyLink(userID, keyID)
-	// if err != nil {
-	// 	return
-	// }
 	return
 }
 
@@ -185,5 +191,10 @@ func ToggleKey(keyID int) (err error) {
 
 	key.Enabled = !key.Enabled
 	err = updateKey(key)
+	return
+}
+
+func GetAllKeys() (keys []Keys, err error) {
+	keys, err = getAll()
 	return
 }

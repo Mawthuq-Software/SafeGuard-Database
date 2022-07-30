@@ -35,6 +35,7 @@ type KeyGetInfo struct {
 	KeyPublic
 }
 
+//Adds a personal user key
 func AddKey(res http.ResponseWriter, req *http.Request) {
 	var bodyReq KeyAdd
 	bodyRes := responses.StandardResponse{}
@@ -84,9 +85,10 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	bodyRes.Response = "added key successfully"
-	responses.Standard(res, bodyRes, http.StatusBadRequest)
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }
 
+//Deletes a personal user key
 func DeleteKey(res http.ResponseWriter, req *http.Request) {
 	var bodyReq KeyDelete
 	bodyRes := responses.StandardResponse{}
@@ -113,9 +115,10 @@ func DeleteKey(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	bodyRes.Response = "deleted key successfully"
-	responses.Standard(res, bodyRes, http.StatusBadRequest)
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }
 
+//Toggles a key usability
 func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 	var bodyReq Key
 	bodyRes := responses.StandardResponse{}
@@ -141,19 +144,28 @@ func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	bodyRes.Response = "toggled key successfully"
-	responses.Standard(res, bodyRes, http.StatusBadRequest)
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }
 
+//Gets all keys from the database
 func GetAllKeys(res http.ResponseWriter, req *http.Request) {
-	bodyRes := responses.StandardResponse{}
+	bodyRes := responses.AllKeyResponse{}
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.KEYS_VIEW_ALL}
 
 	_, validErr := db.ValidateUserPerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		responses.AllKeys(res, bodyRes, http.StatusBadRequest)
 	}
 
-	//ADD LOGIC
+	keys, err := db.GetAllKeys()
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.AllKeys(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Keys = keys
+	bodyRes.Response = "got all keys successfully"
+	responses.AllKeys(res, bodyRes, http.StatusAccepted)
 }
