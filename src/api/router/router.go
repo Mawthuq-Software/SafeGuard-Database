@@ -17,18 +17,18 @@ func NewRouter() *mux.Router {
 	user.HandleFunc("/change-password", routes.ChangeUserPassword).Methods("POST")
 
 	key := router.PathPrefix("/key").Subrouter()
-	key.HandleFunc("/add", routes.AddKey).Methods("GET")
-	key.HandleFunc("/delete", routes.DeleteKey).Methods("GET")
-	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("GET")
-	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("GET")
+	key.HandleFunc("/add", routes.AddKey).Methods("POST")
+	key.HandleFunc("/delete", routes.DeleteKey).Methods("POST")
+	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST")
+	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("POST")
 
 	token := router.PathPrefix("/token").Subrouter()
-	token.HandleFunc("/validate", routes.Validate).Methods("GET")
+	token.HandleFunc("/validate", routes.Validate).Methods("POST")
 
 	subscription := router.PathPrefix("/subscription").Subrouter()
-	subscription.HandleFunc("/edit", routes.EditingSubscription).Methods("GET")
-	subscription.HandleFunc("/get", routes.GetSubscription).Methods("GET")
-	subscription.HandleFunc("/get-all", routes.GetAllSubscriptions).Methods("GET")
+	subscription.HandleFunc("/edit", routes.EditingSubscription).Methods("POST")
+	subscription.HandleFunc("/get", routes.GetSubscription).Methods("POST")
+	subscription.HandleFunc("/get-all", routes.GetAllSubscriptions).Methods("POST")
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router
