@@ -16,6 +16,12 @@ func NewRouter() *mux.Router {
 	user.HandleFunc("/login", routes.LoginWithUsername).Methods("POST")
 	user.HandleFunc("/change-password", routes.ChangeUserPassword).Methods("POST")
 
+	userSubscription := user.PathPrefix("/subscription").Subrouter()
+	// userSubscription.HandleFunc("/edit", routes.EditingUserSubscription).Methods("POST")
+	userSubscription.HandleFunc("/get", routes.GetUserSubscription).Methods("POST")
+	userSubscription.HandleFunc("/get-all", routes.GetAllUserSubscriptions).Methods("POST")
+	userSubscription.HandleFunc("/create", routes.CreateUserSubscription).Methods("POST")
+
 	key := router.PathPrefix("/key").Subrouter()
 	key.HandleFunc("/add", routes.AddKey).Methods("POST")
 	key.HandleFunc("/delete", routes.DeleteKey).Methods("POST")
@@ -24,11 +30,6 @@ func NewRouter() *mux.Router {
 
 	token := router.PathPrefix("/token").Subrouter()
 	token.HandleFunc("/validate", routes.Validate).Methods("POST")
-
-	subscription := router.PathPrefix("/subscription").Subrouter()
-	subscription.HandleFunc("/edit", routes.EditingSubscription).Methods("POST")
-	subscription.HandleFunc("/get", routes.GetSubscription).Methods("POST")
-	subscription.HandleFunc("/get-all", routes.GetAllSubscriptions).Methods("POST")
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router
