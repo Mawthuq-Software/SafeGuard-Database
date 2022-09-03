@@ -1,24 +1,34 @@
 package db
 
-import "github.com/Mawthuq-Software/Wireguard-Central-Node/src/token"
+import (
+	"strconv"
 
-func ValidateUserPerms(bearerToken string, perms []int) (username string, err error) {
+	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/token"
+)
+
+func ValidatePerms(bearerToken string, perms []int) (userIDInt int, err error) {
 	if bearerToken == "" {
-		return "", ErrBearerEmpty
+		err = ErrBearerEmpty
+		return
 	}
-	username, tokenErr := token.ValidateUser(bearerToken)
+	userIDStr, tokenErr := token.ValidateUser(bearerToken) //validate bearer token
 	if tokenErr != nil {
 		err = ErrBearerInvalid
 		return
 	}
-	user, userErr := FindAuthFromUsername(username)
+	userIDInt, userIDErr := strconv.Atoi(userIDStr)
+	if userIDErr != nil {
+		err = userIDErr
+		return
+	}
+	user, userErr := FindAuthFromUserID(userIDInt) //find user info from bearer
 	if userErr != nil {
 		err = userErr
 		return
 	}
 	userHasPerm := false
 	for i := 0; i < len(perms); i++ {
-		hasPerms, permErr := CheckPermission(user.ID, perms[i])
+		hasPerms, permErr := CheckPermission(user.ID, perms[i]) //check to see if matches incoming perms
 		if permErr != nil {
 			err = permErr
 			return

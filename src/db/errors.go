@@ -14,7 +14,11 @@ var (
 	ErrUserGroupNotFound = errors.New("user's groups was not found")
 	ErrCreatingUserGroup = errors.New("could not create new user group")
 	//UserSubscription
-	ErrUserSubscriptionNotFound = errors.New("user does not have subscription")
+	ErrUserSubscriptionNotFound   = errors.New("user does not have subscription")
+	ErrUserSubscriptionsNotFound  = errors.New("userSubscriptions table not found or empty")
+	ErrUserSubscriptionValidation = errors.New("userID does not match userSubscription userID")
+	ErrUserSubscriptionExists     = errors.New("user already has a subscription")
+	ErrCreatingUserSubscription   = errors.New("error creating a user subscription")
 	//Subscription
 	ErrSubscriptionNotFound = errors.New("subscription was not found")
 	ErrSubscriptionExpired  = errors.New("subscription has expired")

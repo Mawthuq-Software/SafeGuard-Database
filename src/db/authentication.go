@@ -20,6 +20,18 @@ func FindAuthFromUsername(username string) (Authentications, error) {
 	return findAuth, nil
 }
 
+func FindAuthFromUserID(userID int) (auth Authentications, err error) {
+	user, err := FindUserFromUserID(userID)
+	if err != nil {
+		return
+	}
+	findAuth, err := findAuthFromAuthID(user.AuthID)
+	if err != nil {
+		return
+	}
+	return findAuth, nil
+}
+
 func FindUserFromAuthID(authID int) (Users, error) {
 	db := DBSystem
 	var findUser Users
@@ -33,4 +45,19 @@ func FindUserFromAuthID(authID int) (Users, error) {
 	}
 
 	return findUser, nil
+}
+
+func findAuthFromAuthID(authID int) (Authentications, error) {
+	db := DBSystem
+	var findAuth Authentications
+
+	authQuery := db.Where("id = ?", authID).First(&findAuth)
+	if errors.Is(authQuery.Error, gorm.ErrRecordNotFound) {
+		return findAuth, ErrUserNotFound
+	} else if authQuery.Error != nil {
+		combinedLogger.Error("Finding authentication " + authQuery.Error.Error())
+		return findAuth, ErrQuery
+	}
+
+	return findAuth, nil
 }

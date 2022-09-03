@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GenerateUser(username string, expiryTime time.Time) (string, error) {
+func GenerateUser(userID string, expiryTime time.Time) (string, error) {
 	issuer := viper.GetString("TOKEN.STRING")
 	secretKey := viper.GetString("TOKEN.SECRETKEY")
 	numericDate := jwt.NewNumericDate(expiryTime)
 
 	claims := jwt.MapClaims{
-		"Username": username,
+		"UserID": userID,
 		"RegisteredClaims": jwt.RegisteredClaims{
 			Issuer:    issuer,
 			ExpiresAt: numericDate,
@@ -39,7 +39,7 @@ func ValidateUser(tokenStr string) (string, error) {
 
 	claims, valid := token.Claims.(jwt.MapClaims)
 	if valid && token.Valid {
-		return claims["Username"].(string), nil
+		return claims["UserID"].(string), nil
 	} else {
 		return "", err
 	}

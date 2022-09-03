@@ -57,7 +57,7 @@ func deleteKey(keyID int) (err error) {
 func addUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	db := DBSystem
 
-	_, err = findUserFromUserID(userID)
+	_, err = FindUserFromUserID(userID)
 	if err != nil {
 		return
 	}

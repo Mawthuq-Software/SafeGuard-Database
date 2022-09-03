@@ -117,7 +117,7 @@ func ChangeUserPassword(username string, oldPassword string, newPassword string)
 }
 
 // Finds user from the userID
-func findUserFromUserID(userID int) (user Users, err error) {
+func FindUserFromUserID(userID int) (user Users, err error) {
 	db := DBSystem
 
 	userQuery := db.Where("id = ?", userID).First(&user)

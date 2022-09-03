@@ -42,7 +42,7 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_ADD, db.KEYS_ADD_ALL}
-	username, validErr := db.ValidateUserPerms(bearerToken, perms)
+	userID, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -72,7 +72,7 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := db.FindUserFromUsername(username)
+	user, err := db.FindUserFromUserID(userID)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -96,7 +96,7 @@ func DeleteKey(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_DELETE, db.KEYS_DELETE_ALL}
 
-	_, validErr := db.ValidateUserPerms(bearerToken, perms)
+	_, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -125,7 +125,7 @@ func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.PERSONAL_KEYS_MODIFY, db.KEYS_MODIFY_ALL}
 
-	_, validErr := db.ValidateUserPerms(bearerToken, perms)
+	_, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -153,7 +153,7 @@ func GetAllKeys(res http.ResponseWriter, req *http.Request) {
 	bearerToken := req.Header.Get("Bearer")
 	perms := []int{db.KEYS_VIEW_ALL}
 
-	_, validErr := db.ValidateUserPerms(bearerToken, perms)
+	_, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.AllKeys(res, bodyRes, http.StatusBadRequest)
