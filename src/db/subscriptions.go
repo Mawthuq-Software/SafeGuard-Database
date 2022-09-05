@@ -7,7 +7,7 @@ import (
 )
 
 // Gets a subscription from subscriptionID
-func GetSubscription(subscriptionID int) (subscription Subscriptions, err error) {
+func ReadSubscription(subscriptionID int) (subscription Subscriptions, err error) {
 	db := DBSystem
 
 	findSub := db.Where("id = ?", subscriptionID).First(&subscription)
@@ -20,7 +20,7 @@ func GetSubscription(subscriptionID int) (subscription Subscriptions, err error)
 	return
 }
 
-func GetSubscriptionByName(subscriptionName string) (subscription Subscriptions, err error) {
+func ReadSubscriptionByName(subscriptionName string) (subscription Subscriptions, err error) {
 	db := DBSystem
 
 	findSub := db.Where("name = ?", subscriptionName).First(&subscription)
@@ -33,9 +33,9 @@ func GetSubscriptionByName(subscriptionName string) (subscription Subscriptions,
 	return
 }
 
-func AddSubscription(name string, numKeys int, totalBandwidth int) (err error) {
+func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
 	db := DBSystem
-	_, err = GetSubscriptionByName(name)
+	_, err = ReadSubscriptionByName(name)
 	if err != ErrSubscriptionNotFound {
 		newSub := Subscriptions{Name: name, NumberOfKeys: numKeys, TotalBandwidth: totalBandwidth}
 		createErr := db.Create(&newSub)
@@ -46,4 +46,48 @@ func AddSubscription(name string, numKeys int, totalBandwidth int) (err error) {
 		return nil
 	}
 	return
+}
+
+//Updates a subscription. Use -1 for numKeys or totalBandwidth to keep current value.
+func UpdateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
+	db := DBSystem
+	subs, err := ReadSubscriptionByName(name)
+	if err != nil {
+		return
+	}
+
+	if numKeys > -1 {
+		subs.NumberOfKeys = numKeys
+	}
+	if totalBandwidth > -1 {
+		subs.TotalBandwidth = totalBandwidth
+	}
+	saveErrs := db.Save(&subs)
+	if saveErrs.Error != nil {
+		err = saveErrs.Error
+		return
+	}
+	return nil
+}
+
+func DeleteSubscription(name string) (err error) {
+	db := DBSystem
+	subs, err := ReadSubscriptionByName(name)
+	if err != nil {
+		return
+	}
+
+	var userSubs []UserSubscriptions
+
+	findUserSubs := db.Where("subscription_id = ?", subs.ID).Find(&userSubs)
+	if !errors.Is(findUserSubs.Error, gorm.ErrRecordNotFound) {
+		err = ErrUsersSubscriptionExists
+		return
+	}
+	delErr := db.Delete(&userSubs)
+	if delErr.Error != nil {
+		err = delErr.Error
+		return
+	}
+	return nil
 }

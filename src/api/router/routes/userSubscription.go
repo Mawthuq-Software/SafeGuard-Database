@@ -85,7 +85,7 @@ func GetUserSubscription(res http.ResponseWriter, req *http.Request) {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
 	} else if validAdminErr == nil { //If request is from admin with perms
-		userSub, userSubErr := db.GetUserSubscriptionFromID(bodyReq.UserSubscriptionID)
+		userSub, userSubErr := db.ReadUserSubscriptionFromID(bodyReq.UserSubscriptionID)
 		if userSubErr != nil {
 			bodyRes.Response = userSubErr.Error()
 			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
@@ -122,7 +122,7 @@ func GetAllUserSubscriptions(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userSubs, dumpErr := db.GetAllUserSubscriptions()
+	userSubs, dumpErr := db.ReadAllUserSubscriptions()
 	if dumpErr != nil {
 		bodyRes.Response = dumpErr.Error()
 		responses.DumpUserSubscription(res, bodyRes, http.StatusBadRequest)
@@ -170,7 +170,7 @@ func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 	} else if validAdminErr == nil { //If request is from admin with perms
 		expTime := time.Now().Add(time.Hour * 24000)
-		userSubErr := db.AddUserSubscription(bodyReq.UserID, bodyReq.SubscriptionID, expTime)
+		userSubErr := db.CreateUserSubscription(bodyReq.UserID, bodyReq.SubscriptionID, expTime)
 		if userSubErr != nil {
 			bodyRes.Response = userSubErr.Error()
 			responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -187,7 +187,7 @@ func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		expTime := time.Now().Add(time.Hour * 24000)
-		userSubErr := db.AddUserSubscription(bodyReq.UserID, bodyReq.SubscriptionID, expTime)
+		userSubErr := db.CreateUserSubscription(bodyReq.UserID, bodyReq.SubscriptionID, expTime)
 		if userSubErr != nil {
 			bodyRes.Response = userSubErr.Error()
 			responses.Standard(res, bodyRes, http.StatusBadRequest)

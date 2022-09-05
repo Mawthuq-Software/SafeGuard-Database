@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetUserSubscriptionFromID(userSubID int) (userSubscription UserSubscriptions, err error) {
+func ReadUserSubscriptionFromID(userSubID int) (userSubscription UserSubscriptions, err error) {
 	db := DBSystem
 
 	findUserSub := db.Where("id = ?", userSubID).First(&userSubscription)
@@ -20,7 +20,7 @@ func GetUserSubscriptionFromID(userSubID int) (userSubscription UserSubscription
 	return
 }
 
-func GetUserSubscriptionFromUserID(userID int) (userSubscription UserSubscriptions, err error) {
+func ReadUserSubscriptionFromUserID(userID int) (userSubscription UserSubscriptions, err error) {
 	db := DBSystem
 
 	findUserSub := db.Where("user_id = ?", userID).First(&userSubscription)
@@ -33,7 +33,7 @@ func GetUserSubscriptionFromUserID(userID int) (userSubscription UserSubscriptio
 }
 
 // Gets all user subscriptions from the database
-func GetAllUserSubscriptions() (userSubs []UserSubscriptions, err error) {
+func ReadAllUserSubscriptions() (userSubs []UserSubscriptions, err error) {
 	db := DBSystem
 
 	findUserSubs := db.Find(&userSubs)
@@ -45,11 +45,11 @@ func GetAllUserSubscriptions() (userSubs []UserSubscriptions, err error) {
 	return
 }
 
-func AddUserSubscription(userID int, subscriptionID int, expiryTime time.Time) (err error) {
+func CreateUserSubscription(userID int, subscriptionID int, expiryTime time.Time) (err error) {
 	var userSubFind UserSubscriptions
 	db := DBSystem
 
-	findUserSub := db.Where("userID = ?", userID).First(&userSubFind)
+	findUserSub := db.Where("user_id = ?", userID).First(&userSubFind)
 	if !errors.Is(findUserSub.Error, gorm.ErrRecordNotFound) {
 		return ErrUserSubscriptionExists
 	}
@@ -65,7 +65,7 @@ func AddUserSubscription(userID int, subscriptionID int, expiryTime time.Time) (
 
 // Checks to see if a new key can be added
 func checkSubscriptionKeyAddition(userID int) (err error) {
-	userSubscription, err := GetUserSubscriptionFromUserID(userID)
+	userSubscription, err := ReadUserSubscriptionFromUserID(userID)
 	if err != nil {
 		fmt.Println(err)
 
@@ -76,7 +76,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 		return
 	}
 
-	subscription, err := GetSubscription(userSubscription.SubscriptionID)
+	subscription, err := ReadSubscription(userSubscription.SubscriptionID)
 	if err != nil {
 		return
 	}
@@ -98,7 +98,7 @@ func ValidateUsernameUserSubscription(userID int, userSubID int) (err error) {
 	if findUserErr != nil {
 		return findUserErr
 	}
-	userSub, userSubErr := GetUserSubscriptionFromID(userSubID)
+	userSub, userSubErr := ReadUserSubscriptionFromID(userSubID)
 	if userSubErr != nil {
 		return userSubErr
 	}

@@ -19,6 +19,7 @@ var (
 	ErrUserSubscriptionValidation = errors.New("userID does not match userSubscription userID")
 	ErrUserSubscriptionExists     = errors.New("user already has a subscription")
 	ErrCreatingUserSubscription   = errors.New("error creating a user subscription")
+	ErrUsersSubscriptionExists    = errors.New("user(s) with existing user subscriptions")
 	//Subscription
 	ErrSubscriptionNotFound = errors.New("subscription was not found")
 	ErrSubscriptionExpired  = errors.New("subscription has expired")
