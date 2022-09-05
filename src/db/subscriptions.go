@@ -70,16 +70,11 @@ func UpdateSubscription(name string, numKeys int, totalBandwidth int) (err error
 	return nil
 }
 
-func DeleteSubscription(name string) (err error) {
+func DeleteSubscription(subscriptionID int) (err error) {
 	db := DBSystem
-	subs, err := ReadSubscriptionByName(name)
-	if err != nil {
-		return
-	}
-
 	var userSubs []UserSubscriptions
 
-	findUserSubs := db.Where("subscription_id = ?", subs.ID).Find(&userSubs)
+	findUserSubs := db.Where("subscription_id = ?", subscriptionID).Find(&userSubs)
 	if !errors.Is(findUserSubs.Error, gorm.ErrRecordNotFound) {
 		err = ErrUsersSubscriptionExists
 		return
@@ -90,4 +85,13 @@ func DeleteSubscription(name string) (err error) {
 		return
 	}
 	return nil
+}
+
+func DeleteSubscriptionByName(name string) (err error) {
+	subs, err := ReadSubscriptionByName(name)
+	if err != nil {
+		return
+	}
+	err = DeleteSubscription(subs.ID)
+	return
 }
