@@ -166,19 +166,7 @@ type ServerConfigurations struct {
 
 type Configurations struct {
 	StandardModel
-	DNS string
-}
-
-type ConfigSubnets struct {
-	StandardModel
-	ConfigID       int
-	Configurations Configurations `gorm:"foreignKey:ConfigID"`
-	SubnetID       int
-	Subnets        Subnets `gorm:"foreignKey:SubnetID"`
-}
-
-type Subnets struct {
-	StandardModel
+	DNS  string
 	Mask int
 }
 
