@@ -6,6 +6,22 @@ import (
 	"gorm.io/gorm"
 )
 
+//Creates a new subscription
+func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
+	db := DBSystem
+	_, err = ReadSubscriptionByName(name)
+	if err != ErrSubscriptionNotFound {
+		newSub := Subscriptions{Name: name, NumberOfKeys: numKeys, TotalBandwidth: totalBandwidth}
+		createErr := db.Create(&newSub)
+		if createErr != nil {
+			err = createErr.Error
+			return
+		}
+		return nil
+	}
+	return
+}
+
 // Gets a subscription from subscriptionID
 func ReadSubscription(subscriptionID int) (subscription Subscriptions, err error) {
 	db := DBSystem
@@ -29,21 +45,6 @@ func ReadSubscriptionByName(subscriptionName string) (subscription Subscriptions
 		return
 	} else if findSub.Error != nil {
 		err = ErrQuery
-	}
-	return
-}
-
-func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
-	db := DBSystem
-	_, err = ReadSubscriptionByName(name)
-	if err != ErrSubscriptionNotFound {
-		newSub := Subscriptions{Name: name, NumberOfKeys: numKeys, TotalBandwidth: totalBandwidth}
-		createErr := db.Create(&newSub)
-		if createErr != nil {
-			err = createErr.Error
-			return
-		}
-		return nil
 	}
 	return
 }

@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
@@ -126,22 +127,10 @@ func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
 
 //Get a user's subscription
 func GetUserSubscription(res http.ResponseWriter, req *http.Request) {
-	var bodyReq UserSubscription
 	bodyRes := responses.UserSubscriptionResponse{}
+	queryVars := req.URL.Query()
 
-	err := ParseRequest(req, &bodyReq)
-	if err != nil {
-		combinedLogger.Error("Parsing request " + err.Error())
-		bodyRes.Response = "Error parsing request"
-		responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-		return
-	}
-
-	if bodyReq.UserSubscriptionID <= 0 {
-		bodyRes.Response = "userSubscriptionID must be > 0"
-		responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-		return
-	}
+	userSubIDStr := queryVars.Get("id")
 
 	//check perms
 	bearerToken := req.Header.Get("Bearer")
@@ -151,32 +140,42 @@ func GetUserSubscription(res http.ResponseWriter, req *http.Request) {
 	adminPerms := []int{db.USER_SUBSCRIPTION_VIEW_ALL}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
-	if validUserErr != nil && validAdminErr != nil {
-		fmt.Println(validUserErr.Error())
-		bodyRes.Response = "user does not have permission or an error occurred"
+	if userSubIDStr != "" { //check param
+		userSubscriptionID, convErr := strconv.Atoi(userSubIDStr) //convert param to int
+		if convErr != nil {
+			bodyRes.Response = "id was unable to be converted to int"
+			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+		}
+		if validUserErr != nil && validAdminErr != nil {
+			fmt.Println(validUserErr.Error())
+			bodyRes.Response = "user does not have permission or an error occurred"
+			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+		} else if validAdminErr == nil { //If request is from admin with perms
+			userSub, userSubErr := db.ReadUserSubscriptionFromID(userSubscriptionID)
+			if userSubErr != nil {
+				bodyRes.Response = userSubErr.Error()
+				responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+				return
+			}
+			bodyRes.UserSubscription = userSub
+			bodyRes.Response = "pulled user subscription successfully"
+			responses.UserSubscription(res, bodyRes, http.StatusAccepted)
+			return
+		} else if validUserErr == nil { //If incoming request is not from admin, run this
+			validationErr := db.ValidateUsernameUserSubscription(userID, userSubscriptionID)
+			if validationErr != nil {
+				bodyRes.Response = validationErr.Error()
+				responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+				return
+			}
+		} else {
+			bodyRes.Response = "an error occurred"
+			responses.UserSubscription(res, bodyRes, http.StatusInternalServerError)
+			return
+		}
+	} else { //param is empty
+		bodyRes.Response = "id needs to be filled"
 		responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-	} else if validAdminErr == nil { //If request is from admin with perms
-		userSub, userSubErr := db.ReadUserSubscriptionFromID(bodyReq.UserSubscriptionID)
-		if userSubErr != nil {
-			bodyRes.Response = userSubErr.Error()
-			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-			return
-		}
-		bodyRes.UserSubscription = userSub
-		bodyRes.Response = "pulled user subscription successfully"
-		responses.UserSubscription(res, bodyRes, http.StatusAccepted)
-		return
-	} else if validUserErr == nil { //If incoming request is not from admin, run this
-		validationErr := db.ValidateUsernameUserSubscription(userID, bodyReq.UserSubscriptionID)
-		if validationErr != nil {
-			bodyRes.Response = validationErr.Error()
-			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-			return
-		}
-	} else {
-		bodyRes.Response = "an error occurred"
-		responses.UserSubscription(res, bodyRes, http.StatusInternalServerError)
-		return
 	}
 }
 

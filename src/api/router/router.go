@@ -18,9 +18,9 @@ func NewRouter() *mux.Router {
 
 	userSubscription := user.PathPrefix("/subscription").Subrouter()
 	// userSubscription.HandleFunc("/edit", routes.EditingUserSubscription).Methods("POST")
-	userSubscription.HandleFunc("/get", routes.GetUserSubscription).Methods("POST")
-	userSubscription.HandleFunc("/get-all", routes.GetAllUserSubscriptions).Methods("POST")
-	userSubscription.HandleFunc("/create", routes.CreateUserSubscription).Methods("POST")
+	userSubscription.HandleFunc("/", routes.CreateUserSubscription).Methods("POST")
+	userSubscription.HandleFunc("/", routes.GetUserSubscription).Methods("GET")
+	userSubscription.HandleFunc("/all", routes.GetAllUserSubscriptions).Methods("GET")
 
 	subscription := router.PathPrefix("/subscription").Subrouter()
 	subscription.HandleFunc("/", routes.CreateSubscription).Methods("POST")
