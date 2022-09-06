@@ -43,24 +43,24 @@ const (
 func startupCreation() {
 
 	standardVPNPerms := []int{PERSONAL_KEYS_VIEW, PERSONAL_KEYS_ADD, PERSONAL_PASSWORD_RESET, PERSONAL_LOGIN, PERSONAL_USER_SUBSCRIPTION_VIEW, PERSONAL_USER_SUBSCRIPTION_ADD, PERSONAL_SUBSCRIPTION_VIEW}
-	AddPolicy("STANDARD_USER_VPN", standardVPNPerms)
+	CreatePolicy("STANDARD_USER_VPN", standardVPNPerms)
 
 	userSettingPerms := []int{PERSONAL_PASSWORD_RESET, PERSONAL_LOGIN}
-	AddPolicy("STANDARD_USER_SETTINGS", userSettingPerms)
+	CreatePolicy("STANDARD_USER_SETTINGS", userSettingPerms)
 
 	advancedUserVPNPerms := []int{PERSONAL_KEYS_MODIFY, PERSONAL_KEYS_DELETE}
-	AddPolicy("ADVANCED_USER_VPN", advancedUserVPNPerms)
+	CreatePolicy("ADVANCED_USER_VPN", advancedUserVPNPerms)
 
 	adminPerms := []int{KEYS_VIEW_ALL, KEYS_ADD_ALL, KEYS_ADD_OVERRIDE, KEYS_DELETE_ALL, KEYS_MODIFY_ALL, PASSWORD_RESET_ALL}
-	AddPolicy("ADMIN_USER", adminPerms)
+	CreatePolicy("ADMIN_USER", adminPerms)
 
-	AddGroup("User")
+	CreateGroup("User")
 	userPolicies := []string{"STANDARD_USER_VPN", "STANDARD_USER_SETTINGS"}
-	AddGroupPolicies("User", userPolicies)
+	CreateGroupPolicies("User", userPolicies)
 
-	AddGroup("Admin")
+	CreateGroup("Admin")
 	adminPolicies := []string{"STANDARD_USER_VPN", "STANDARD_USER_SETTINGS", "ADVANCED_USER_VPN", "ADMIN_USER"}
-	AddGroupPolicies("Admin", adminPolicies)
+	CreateGroupPolicies("Admin", adminPolicies)
 }
 
 func CheckPermission(userID int, permID int) (bool, error) {
@@ -75,21 +75,21 @@ func CheckPermission(userID int, permID int) (bool, error) {
 		return false, ErrQuery
 	}
 
-	userGroups, userGroupErr := GetAllUserGroups(userID)
+	userGroups, userGroupErr := ReadAllUserGroups(userID)
 	if userGroupErr != nil {
 		return false, userGroupErr
 	}
 
 	for x := 0; x < len(userGroups); x++ {
 		groupID := userGroups[x].GroupID
-		groupPol, errGroupPol := GetGroupPolicies(groupID)
+		groupPol, errGroupPol := ReadGroupPolicies(groupID)
 		if errGroupPol != nil {
 			return false, errGroupPol
 		}
 
 		for y := 0; y < len(groupPol); y++ {
 			policyID := groupPol[y].PolicyID
-			permsArr, errPerms := GetPermissions(policyID)
+			permsArr, errPerms := ReadPermissions(policyID)
 			if errPerms != nil {
 				return false, errPerms
 			}
@@ -108,7 +108,7 @@ func CheckPermission(userID int, permID int) (bool, error) {
 	return false, nil
 }
 
-func GetAllUserGroups(userID int) ([]UserGroups, error) {
+func ReadAllUserGroups(userID int) ([]UserGroups, error) {
 	db := DBSystem
 	var findUserGroup []UserGroups
 
@@ -121,7 +121,7 @@ func GetAllUserGroups(userID int) ([]UserGroups, error) {
 	return findUserGroup, nil
 }
 
-func GetGroupPolicies(groupID int) ([]GroupPolicies, error) {
+func ReadGroupPolicies(groupID int) ([]GroupPolicies, error) {
 	db := DBSystem
 	var findGroupPol []GroupPolicies
 
@@ -134,7 +134,7 @@ func GetGroupPolicies(groupID int) ([]GroupPolicies, error) {
 	return findGroupPol, nil
 }
 
-func GetPermissions(policyID int) ([]string, error) {
+func ReadPermissions(policyID int) ([]string, error) {
 	db := DBSystem
 	var findPolicy Policies
 
@@ -150,7 +150,7 @@ func GetPermissions(policyID int) ([]string, error) {
 	return perms, nil
 }
 
-func AddPolicy(policyName string, perms []int) error {
+func CreatePolicy(policyName string, perms []int) error {
 	db := DBSystem
 
 	totalPerms := ""
@@ -168,7 +168,7 @@ func AddPolicy(policyName string, perms []int) error {
 	return nil
 }
 
-func AddGroup(groupName string) error {
+func CreateGroup(groupName string) error {
 	db := DBSystem
 
 	newGroup := Groups{Name: groupName}
@@ -180,7 +180,7 @@ func AddGroup(groupName string) error {
 	return nil
 }
 
-func AddGroupPolicies(groupName string, policyNames []string) error {
+func CreateGroupPolicies(groupName string, policyNames []string) error {
 	db := DBSystem
 	var findGroup Groups
 

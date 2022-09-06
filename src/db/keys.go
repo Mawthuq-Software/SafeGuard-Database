@@ -7,8 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// CREATE
+
 // Adds a key to the database and returns the keyID
-func addKey(serverID int, publicKey string, presharedKey string) (keyID int, err error) {
+func createKey(serverID int, publicKey string, presharedKey string) (keyID int, err error) {
 	db := DBSystem
 	_, err = findServerFromServerID(serverID)
 	if err != nil {
@@ -37,61 +39,25 @@ func addKey(serverID int, publicKey string, presharedKey string) (keyID int, err
 	return
 }
 
-//Deletes a key from keyID
-func deleteKey(keyID int) (err error) {
-	db := DBSystem
-
-	keyQuery, err := findKeyFromKeyID(keyID)
+//Adds a user's key after checking their subscription validity
+func CreateKeyAndLink(userID int, serverID int, publicKey string, presharedKey string) (err error) {
+	err = checkSubscriptionKeyAddition(userID)
 	if err != nil {
 		return
 	}
 
-	keyDelete := db.Delete(&keyQuery)
-	if keyDelete.Error != nil {
-		err = ErrDeletingKey
+	keyID, err := createKey(serverID, publicKey, presharedKey)
+	if err != nil {
+		return
 	}
+	_, err = createUserKeyLink(userID, keyID)
 	return
 }
 
-//Adds a link between the userID and keyID in userKey table
-func addUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
-	db := DBSystem
-
-	_, err = FindUserFromUserID(userID)
-	if err != nil {
-		return
-	}
-	_, err = findKeyFromKeyID(keyID)
-	if err != nil {
-		return
-	}
-	userKey := UserKeys{UserID: userID, KeyID: keyID}
-	userKeyCreation := db.Create(&userKey)
-	if userKeyCreation.Error != nil {
-		err = ErrUserKeyLink
-		return
-	}
-	userKeyID = userKey.ID
-	return
-}
-
-//Deletes a link between a user and key
-func deleteUserKeyLink(keyID int) (err error) {
-	db := DBSystem
-
-	userKey, err := findUserKeysFromKeyID(keyID)
-	if err != nil {
-		return
-	}
-	userKeyDelete := db.Delete(&userKey)
-	if userKeyDelete.Error != nil {
-		err = ErrDeletingUserKey
-	}
-	return
-}
+// READ
 
 //finds a key object from a keyID
-func findKeyFromKeyID(keyID int) (key Keys, err error) {
+func readKey(keyID int) (key Keys, err error) {
 	db := DBSystem
 
 	keyQuery := db.Where("id = ?", keyID).First(&key)
@@ -99,20 +65,6 @@ func findKeyFromKeyID(keyID int) (key Keys, err error) {
 		err = ErrKeyNotFound
 	} else if keyQuery.Error != nil {
 		combinedLogger.Error("Finding key " + keyQuery.Error.Error())
-		err = ErrQuery
-	}
-	return
-}
-
-//finds a user key link from the keyID
-func findUserKeysFromKeyID(keyID int) (userKeys UserKeys, err error) {
-	db := DBSystem
-
-	keyQuery := db.Where("id = ?", keyID).First(&userKeys)
-	if errors.Is(keyQuery.Error, gorm.ErrRecordNotFound) {
-		err = ErrUserKeyNotFound
-	} else if keyQuery.Error != nil {
-		combinedLogger.Error("Finding user key " + keyQuery.Error.Error())
 		err = ErrQuery
 	}
 	return
@@ -131,14 +83,16 @@ func findUserKeys(userID int) (userKeys []UserKeys, err error) {
 	return
 }
 
-//checks to see if wireguard key is appropriate
-func checkKeyValidity(key string) (err error) {
-	_, err = wgmanager.ParseKey(key) //parse string
-	if err != nil {
-		err = ErrPublicKeyIncorrectForm
-	}
-	return
+//gets all keys in database
+func ReadAllKeys() (keys []Keys, err error) {
+	db := DBSystem
+
+	dbResult := db.Find(&keys)
+	err = dbResult.Error
+	return keys, err
 }
+
+//UPDATE
 
 //updates a key object
 func updateKey(key Keys) (err error) {
@@ -148,43 +102,39 @@ func updateKey(key Keys) (err error) {
 	return
 }
 
-//gets all keys in database
-func getAll() (keys []Keys, err error) {
+// DELETE
+
+//Deletes a key from keyID
+func DeleteKey(keyID int) (err error) {
 	db := DBSystem
 
-	dbResult := db.Find(&keys)
-	err = dbResult.Error
-	return keys, err
-}
-
-//Adds a user's key after checking their subscription validity
-func AddUserKey(userID int, serverID int, publicKey string, presharedKey string) (err error) {
-	err = checkSubscriptionKeyAddition(userID)
+	keyQuery, err := readKey(keyID)
 	if err != nil {
 		return
 	}
 
-	keyID, err := addKey(serverID, publicKey, presharedKey)
-	if err != nil {
-		return
+	keyDelete := db.Delete(&keyQuery)
+	if keyDelete.Error != nil {
+		err = ErrDeletingKey
 	}
-	_, err = addUserKeyLink(userID, keyID)
 	return
 }
 
-//Deletes a user's key
-func DeleteUserKey(keyID int) (err error) {
+//Deletes a user's key and link
+func DeleteKeyAndLink(keyID int) (err error) {
 	err = deleteUserKeyLink(keyID)
 	if err != nil {
 		return
 	}
-	err = deleteKey(keyID)
+	err = DeleteKey(keyID)
 	return
 }
 
+//MISC
+
 //Toggles a key usability from true to false and viceversa
 func ToggleKey(keyID int) (err error) {
-	key, err := findKeyFromKeyID(keyID)
+	key, err := readKey(keyID)
 	if err != nil {
 		return
 	}
@@ -194,7 +144,11 @@ func ToggleKey(keyID int) (err error) {
 	return
 }
 
-func GetAllKeys() (keys []Keys, err error) {
-	keys, err = getAll()
+//checks to see if wireguard key is appropriate
+func checkKeyValidity(key string) (err error) {
+	_, err = wgmanager.ParseKey(key) //parse string
+	if err != nil {
+		err = ErrPublicKeyIncorrectForm
+	}
 	return
 }

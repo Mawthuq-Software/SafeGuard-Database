@@ -78,7 +78,7 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	err = db.AddUserKey(user.ID, bodyReq.ServerID, bodyReq.PublicKey, bodyReq.PresharedKey)
+	err = db.CreateKeyAndLink(user.ID, bodyReq.ServerID, bodyReq.PublicKey, bodyReq.PresharedKey)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -108,7 +108,7 @@ func DeleteKey(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	err := db.DeleteUserKey(bodyReq.ID)
+	err := db.DeleteKeyAndLink(bodyReq.ID)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -159,7 +159,7 @@ func GetAllKeys(res http.ResponseWriter, req *http.Request) {
 		responses.AllKeys(res, bodyRes, http.StatusBadRequest)
 	}
 
-	keys, err := db.GetAllKeys()
+	keys, err := db.ReadAllKeys()
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.AllKeys(res, bodyRes, http.StatusBadRequest)

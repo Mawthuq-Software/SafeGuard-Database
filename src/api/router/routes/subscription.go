@@ -111,24 +111,20 @@ func ReadSubscription(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func UpdateSubscriptionNumKeys(res http.ResponseWriter, req *http.Request) {
-	var bodyReq Subscription
+func UpdateSubscription(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.StandardResponse{}
+	queryVars := req.URL.Query()
 
-	err := ParseRequest(req, &bodyReq)
-	if err != nil {
-		combinedLogger.Error("Parsing request " + err.Error())
-		bodyRes.Response = "Error parsing request"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
-	}
+	subscriptionName := queryVars.Get("name")
+	totalBandwidth := queryVars.Get("totalBandwidth")
+	numberOfKeys := queryVars.Get("numberOfKeys")
 
-	if bodyReq.NumberOfKeys < 0 {
-		bodyRes.Response = "numberOfKeys must be >= 0"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
-	} else if bodyReq.Name == "" {
+	if subscriptionName == "" {
 		bodyRes.Response = "name must be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if totalBandwidth == "" && numberOfKeys == "" {
+		bodyRes.Response = "totalBandwidth or numberOfKeys needs to be filled"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
@@ -145,51 +141,38 @@ func UpdateSubscriptionNumKeys(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	updateErr := db.UpdateSubscription(bodyReq.Name, bodyReq.NumberOfKeys, -1)
-	if updateErr != nil {
-		bodyRes.Response = updateErr.Error()
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
+	numKeys := -1
+	totalBW := -1
+
+	if numberOfKeys != "" {
+		numKeysInt, convErr := strconv.Atoi(numberOfKeys)
+		if convErr != nil {
+			bodyRes.Response = "numberOfKeys could not be converted to integer"
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		if numKeysInt < 0 {
+			bodyRes.Response = "numberOfKeys needs to be >= 0"
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		numKeys = numKeysInt
 	}
-	bodyRes.Response = "Updated subscription successfully"
-	responses.Standard(res, bodyRes, http.StatusBadRequest)
-}
-
-func UpdateSubscriptionBandwidth(res http.ResponseWriter, req *http.Request) {
-	var bodyReq Subscription
-	bodyRes := responses.StandardResponse{}
-
-	err := ParseRequest(req, &bodyReq)
-	if err != nil {
-		combinedLogger.Error("Parsing request " + err.Error())
-		bodyRes.Response = "Error parsing request"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
+	if totalBandwidth != "" {
+		totalBWInt, convErr := strconv.Atoi(totalBandwidth)
+		if convErr != nil {
+			bodyRes.Response = "totalBandwidth could not be converted to integer"
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		if totalBWInt < 0 {
+			bodyRes.Response = "totalBandwidth needs to be >= 0"
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		totalBW = totalBWInt
 	}
-
-	if bodyReq.TotalBandwidth < 0 {
-		bodyRes.Response = "totalBandwidth must be >= 0"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
-	} else if bodyReq.Name == "" {
-		bodyRes.Response = "name must be filled"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
-	}
-
-	//check perms
-	bearerToken := req.Header.Get("Bearer")
-
-	adminPerms := []int{db.SUBSCRIPTION_MODIFY_ALL}
-	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
-
-	if validAdminErr != nil {
-		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.Standard(res, bodyRes, http.StatusForbidden)
-		return
-	}
-
-	updateErr := db.UpdateSubscription(bodyReq.Name, -1, bodyReq.TotalBandwidth)
+	updateErr := db.UpdateSubscription(subscriptionName, numKeys, totalBW)
 	if updateErr != nil {
 		bodyRes.Response = updateErr.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

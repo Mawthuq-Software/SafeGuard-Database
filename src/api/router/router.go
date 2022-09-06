@@ -25,8 +25,7 @@ func NewRouter() *mux.Router {
 	subscription := router.PathPrefix("/subscription").Subrouter()
 	subscription.HandleFunc("/", routes.CreateSubscription).Methods("POST")
 	subscription.HandleFunc("/", routes.ReadSubscription).Methods("GET")
-	subscription.HandleFunc("/update-numberofkeys", routes.UpdateSubscriptionNumKeys).Methods("PUT")
-	subscription.HandleFunc("/update-bandwidth", routes.UpdateSubscriptionBandwidth).Methods("PUT")
+	subscription.HandleFunc("/", routes.UpdateSubscription).Methods("PUT")
 	subscription.HandleFunc("/", routes.DeleteSubscription).Methods("DELETE")
 
 	key := router.PathPrefix("/key").Subrouter()

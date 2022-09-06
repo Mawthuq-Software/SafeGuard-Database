@@ -8,6 +8,28 @@ import (
 	"gorm.io/gorm"
 )
 
+// CREATE
+
+func CreateUserSubscription(userID int, subscriptionID int, expiryTime time.Time) (err error) {
+	var userSubFind UserSubscriptions
+	db := DBSystem
+
+	findUserSub := db.Where("user_id = ?", userID).First(&userSubFind)
+	if !errors.Is(findUserSub.Error, gorm.ErrRecordNotFound) {
+		return ErrUserSubscriptionExists
+	}
+
+	userSub := UserSubscriptions{UserID: userID, SubscriptionID: subscriptionID, UsedBandwidth: 0, Expiry: expiryTime}
+	creatUserSub := db.Create(&userSub)
+	if creatUserSub.Error != nil {
+		combinedLogger.Error("Adding user to db " + creatUserSub.Error.Error())
+		return ErrCreatingUserSubscription
+	}
+	return nil
+}
+
+// READ
+
 func ReadUserSubscriptionFromID(userSubID int) (userSubscription UserSubscriptions, err error) {
 	db := DBSystem
 
@@ -45,23 +67,41 @@ func ReadAllUserSubscriptions() (userSubs []UserSubscriptions, err error) {
 	return
 }
 
-func CreateUserSubscription(userID int, subscriptionID int, expiryTime time.Time) (err error) {
-	var userSubFind UserSubscriptions
-	db := DBSystem
+// UPDATE
 
-	findUserSub := db.Where("user_id = ?", userID).First(&userSubFind)
-	if !errors.Is(findUserSub.Error, gorm.ErrRecordNotFound) {
-		return ErrUserSubscriptionExists
+func UpdateUserSubscription(subscriptionID int, usedBandwidth int, expiry time.Time) (err error) {
+	db := DBSystem
+	subs, err := ReadUserSubscriptionFromID(subscriptionID)
+	if err != nil {
+		return
 	}
 
-	userSub := UserSubscriptions{UserID: userID, SubscriptionID: subscriptionID, UsedBandwidth: 0, Expiry: expiryTime}
-	creatUserSub := db.Create(&userSub)
-	if creatUserSub.Error != nil {
-		combinedLogger.Error("Adding user to db " + creatUserSub.Error.Error())
-		return ErrCreatingUserSubscription
+	if usedBandwidth > -1 {
+		subs.UsedBandwidth = usedBandwidth
+	}
+	if !expiry.IsZero() {
+		subs.Expiry = expiry
+	}
+	saveErrs := db.Save(&subs)
+	if saveErrs.Error != nil {
+		err = saveErrs.Error
+		return
 	}
 	return nil
 }
+
+// DELETE
+
+// func DeleteUserSubscription(subscriptionID int) {
+// 	db := DBSystem
+// 	subs, err := ReadUserSubscriptionFromID(subscriptionID)
+// 	if err != nil {
+// 		return
+// 	}
+
+// }
+
+// MISC
 
 // Checks to see if a new key can be added
 func checkSubscriptionKeyAddition(userID int) (err error) {

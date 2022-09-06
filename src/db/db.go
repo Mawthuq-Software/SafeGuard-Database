@@ -43,8 +43,8 @@ func DBStart() {
 		&IPv4Interfaces{}, &KeyIPv6{}, &PublicIPv6{},
 		&PrivateIPv6{}, &IPv6Interfaces{}, &WireguardInterfaces{},
 		&ServerInterfaces{}, &ServerTokens{}, &Tokens{},
-		&ServerConfigurations{}, &Configurations{}, &ConfigSubnets{},
-		&Subnets{}, &Subscriptions{}, &UserSubscriptions{}) //Migrate tables to sqlite
+		&ServerConfigurations{}, &Configurations{}, &Subscriptions{},
+		&UserSubscriptions{}) //Migrate tables to sqlite
 	if errMigrate != nil {
 		combinedLogger.Fatal("Migrating database " + errMigrate.Error())
 	} else {
