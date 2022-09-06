@@ -67,6 +67,18 @@ func ReadAllUserSubscriptions() (userSubs []UserSubscriptions, err error) {
 	return
 }
 
+func ReadUserSubscriptionWithSubscriptionID(subscriptionID int) (userSubs []UserSubscriptions, err error) {
+	db := DBSystem
+
+	findUserSubs := db.Where("subscription_id = ?", subscriptionID).Find(&userSubs)
+	if errors.Is(findUserSubs.Error, gorm.ErrRecordNotFound) {
+		err = ErrUserSubscriptionsNotFound
+	} else if findUserSubs.Error != nil {
+		err = ErrQuery
+	}
+	return
+}
+
 // UPDATE
 
 func UpdateUserSubscription(subscriptionID int, usedBandwidth int, expiry time.Time) (err error) {
@@ -92,14 +104,23 @@ func UpdateUserSubscription(subscriptionID int, usedBandwidth int, expiry time.T
 
 // DELETE
 
-// func DeleteUserSubscription(subscriptionID int) {
-// 	db := DBSystem
-// 	subs, err := ReadUserSubscriptionFromID(subscriptionID)
-// 	if err != nil {
-// 		return
-// 	}
+func DeleteUserSubscription(subscriptionID int) (err error) {
+	db := DBSystem
+	subs, err := ReadUserSubscriptionFromID(subscriptionID)
+	if err != nil {
+		return
+	}
 
-// }
+	_, readErr := readUserKeys(subs.UserID)
+	if readErr != nil && readErr != ErrKeyNotFound { //check there is an error and not the error we want
+		return readErr
+	}
+	delErr := db.Delete(&subs)
+	if delErr.Error != nil {
+		return delErr.Error
+	}
+	return nil
+}
 
 // MISC
 
@@ -122,7 +143,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 	}
 
 	numKeys := subscription.NumberOfKeys
-	userKeys, err := findUserKeys(userID)
+	userKeys, err := readUserKeys(userID)
 	if err != nil {
 		return
 	}
@@ -130,7 +151,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 		err = ErrSubscriptionKeyMaxed
 		return
 	}
-	return
+	return nil
 }
 
 func ValidateUsernameUserSubscription(userID int, userSubID int) (err error) {

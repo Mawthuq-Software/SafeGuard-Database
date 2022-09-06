@@ -80,6 +80,10 @@ func DeleteSubscription(subscriptionID int) (err error) {
 		err = ErrUsersSubscriptionExists
 		return
 	}
+	_, err = ReadUserSubscriptionWithSubscriptionID(subscriptionID)
+	if err != nil && err != ErrUserSubscriptionsNotFound { // check error is valid
+		return err
+	}
 	delErr := db.Delete(&userSubs)
 	if delErr.Error != nil {
 		err = delErr.Error

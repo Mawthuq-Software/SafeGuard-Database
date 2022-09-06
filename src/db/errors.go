@@ -15,7 +15,7 @@ var (
 	ErrCreatingUserGroup = errors.New("could not create new user group")
 	//UserSubscription
 	ErrUserSubscriptionNotFound   = errors.New("user does not have subscription")
-	ErrUserSubscriptionsNotFound  = errors.New("userSubscriptions table not found or empty")
+	ErrUserSubscriptionsNotFound  = errors.New("userSubscriptions not found or table empty")
 	ErrUserSubscriptionValidation = errors.New("userID does not match userSubscription userID")
 	ErrUserSubscriptionExists     = errors.New("user already has a subscription")
 	ErrCreatingUserSubscription   = errors.New("error creating a user subscription")
@@ -51,7 +51,7 @@ var (
 	ErrDeletingKey               = errors.New("error deleting key from database")
 	ErrPublicKeyIncorrectForm    = errors.New("public key is not in the correct form")
 	ErrPresharedKeyIncorrectForm = errors.New("preshared key is not in the correct form")
-	ErrKeyNotFound               = errors.New("key was not found")
+	ErrKeyNotFound               = errors.New("key(s) was not found")
 	//UserKey
 	ErrUserKeyNotFound = errors.New("user's keys were not found")
 	ErrUserKeyLink     = errors.New("error creating user key link")
