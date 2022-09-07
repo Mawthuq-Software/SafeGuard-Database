@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// CREATE
+
 //Creates a new subscription
 func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
 	db := DBSystem
@@ -21,6 +23,8 @@ func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error
 	}
 	return
 }
+
+// READ
 
 // Gets a subscription from subscriptionID
 func ReadSubscription(subscriptionID int) (subscription Subscriptions, err error) {
@@ -49,6 +53,21 @@ func ReadSubscriptionByName(subscriptionName string) (subscription Subscriptions
 	return
 }
 
+func ReadAllSubscriptions() (subscriptions []Subscriptions, err error) {
+	db := DBSystem
+
+	findSub := db.Find(&subscriptions)
+	if errors.Is(findSub.Error, gorm.ErrRecordNotFound) {
+		err = ErrSubscriptionNotFound
+		return
+	} else if findSub.Error != nil {
+		err = ErrQuery
+	}
+	return
+}
+
+// UPDATE
+
 //Updates a subscription. Use -1 for numKeys or totalBandwidth to keep current value.
 func UpdateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
 	db := DBSystem
@@ -70,6 +89,8 @@ func UpdateSubscription(name string, numKeys int, totalBandwidth int) (err error
 	}
 	return nil
 }
+
+// DELETE
 
 func DeleteSubscription(subscriptionID int) (err error) {
 	db := DBSystem

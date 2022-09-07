@@ -17,14 +17,16 @@ func NewRouter() *mux.Router {
 	user.HandleFunc("/change-password", routes.ChangeUserPassword).Methods("POST")
 
 	userSubscription := user.PathPrefix("/subscription").Subrouter()
-	// userSubscription.HandleFunc("/edit", routes.EditingUserSubscription).Methods("POST")
 	userSubscription.HandleFunc("/", routes.CreateUserSubscription).Methods("POST")
-	userSubscription.HandleFunc("/", routes.GetUserSubscription).Methods("GET")
-	userSubscription.HandleFunc("/all", routes.GetAllUserSubscriptions).Methods("GET")
+	userSubscription.HandleFunc("/", routes.ReadUserSubscription).Methods("GET")
+	userSubscription.HandleFunc("/all", routes.ReadAllUserSubscriptions).Methods("GET")
+	userSubscription.HandleFunc("/", routes.UpdateUserSubscription).Methods("PUT")
+	userSubscription.HandleFunc("/", routes.DeleteUserSubscription).Methods("DELETE")
 
 	subscription := router.PathPrefix("/subscription").Subrouter()
 	subscription.HandleFunc("/", routes.CreateSubscription).Methods("POST")
 	subscription.HandleFunc("/", routes.ReadSubscription).Methods("GET")
+	subscription.HandleFunc("/all", routes.ReadAllSubscriptions).Methods("GET")
 	subscription.HandleFunc("/", routes.UpdateSubscription).Methods("PUT")
 	subscription.HandleFunc("/", routes.DeleteSubscription).Methods("DELETE")
 

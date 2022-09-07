@@ -45,7 +45,8 @@ func CreateSubscription(res http.ResponseWriter, req *http.Request) {
 
 	if validAdminErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
 	} else if validAdminErr == nil { //If request is from admin with perms
 		adminSubErr := db.CreateSubscription(bodyReq.Name, bodyReq.NumberOfKeys, bodyReq.TotalBandwidth)
 		if adminSubErr != nil {
@@ -71,17 +72,8 @@ func ReadSubscription(res http.ResponseWriter, req *http.Request) {
 	subscriptionIDStr := queryVars.Get("id")
 	subscriptionName := queryVars.Get("name")
 
-	//check perms
-	bearerToken := req.Header.Get("Bearer")
+	// No need to check permission
 
-	adminPerms := []int{db.SUBSCRIPTION_MODIFY_ALL}
-	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
-
-	if validAdminErr != nil {
-		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.Subscription(res, bodyRes, http.StatusForbidden)
-		return
-	}
 	if subscriptionIDStr != "" {
 		subscriptionID, convErr := strconv.Atoi(subscriptionIDStr)
 		if convErr != nil {
@@ -106,9 +98,28 @@ func ReadSubscription(res http.ResponseWriter, req *http.Request) {
 		}
 		bodyRes.Subscription = sub
 		bodyRes.Response = "pulled subscription successfully"
+		responses.Subscription(res, bodyRes, http.StatusBadRequest)
+		return
 	} else {
 		bodyRes.Response = "id or name query must be filled"
+		responses.Subscription(res, bodyRes, http.StatusBadRequest)
+		return
 	}
+}
+
+func ReadAllSubscriptions(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.DumpSubscriptionResponse{}
+	// No need to check permission
+
+	subs, subErr := db.ReadAllSubscriptions()
+	if subErr != nil {
+		bodyRes.Response = subErr.Error()
+		responses.DumpSubscriptions(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Subscriptions = subs
+	bodyRes.Response = "pulled subscriptions successfully"
+	responses.DumpSubscriptions(res, bodyRes, http.StatusAccepted)
 }
 
 func UpdateSubscription(res http.ResponseWriter, req *http.Request) {
@@ -223,7 +234,11 @@ func DeleteSubscription(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		bodyRes.Response = "deleted subscription successfully"
+		responses.Standard(res, bodyRes, http.StatusAccepted)
+		return
 	} else {
 		bodyRes.Response = "id or name query must be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
 	}
 }

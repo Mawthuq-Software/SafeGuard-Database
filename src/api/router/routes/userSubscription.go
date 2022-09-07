@@ -26,33 +26,7 @@ type AddUserSubscription struct {
 	Subscription
 }
 
-//Edits a user's subscription
-// func EditingUserSubscription(res http.ResponseWriter, req *http.Request) {
-// 	//add json
-
-// 	bodyRes := responses.StandardResponse{}
-// 	bearerToken := req.Header.Get("Bearer")
-// 	userPerms := []int{db.PERSONAL_SUBSCRIPTION_MODIFY} //db.SUBSCRIPTION_MODIFY_ALL
-// 	username, validUserErr := db.ValidatePerms(bearerToken, userPerms)
-
-// 	adminPerms := []int{db.SUBSCRIPTION_MODIFY_ALL} //db.SUBSCRIPTION_MODIFY_ALL
-// 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
-
-// 	if validUserErr != nil && validAdminErr != nil {
-// 		bodyRes.Response = "user does not have permission or an error occurred"
-// 		responses.Standard(res, bodyRes, http.StatusBadRequest)
-// 	} else if validAdminErr == nil {
-// 		// Do logic ok
-
-// 	} else if validUserErr == nil { //If incoming request is not from admin, run this
-// 		validationErr := db.ValidateUsernameUserSubscription(username, UserSubscriptionID)
-// 		if validationErr != nil {
-// 			bodyRes.Response = validationErr.Error()
-// 			responses.Standard(res, bodyRes, http.StatusBadRequest)
-// 			return
-// 		}
-// 	}
-// }
+// CREATE
 
 //Ties a user to a subscription.
 func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
@@ -80,7 +54,7 @@ func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
 	//check perms
 	bearerToken := req.Header.Get("Bearer")
 
-	userPerms := []int{db.PERSONAL_SUBSCRIPTION_MODIFY}
+	userPerms := []int{db.PERSONAL_USER_SUBSCRIPTION_ADD}
 	userID, validUserErr := db.ValidatePerms(bearerToken, userPerms)
 
 	adminPerms := []int{db.USER_SUBSCRIPTION_MODIFY_ALL}
@@ -88,7 +62,8 @@ func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
 
 	if validUserErr != nil && validAdminErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
 	} else if validAdminErr == nil { //If request is from admin with perms
 		expTime := time.Now().Add(time.Hour * 24000)
 		userSubErr := db.CreateUserSubscription(bodyReq.UserID, bodyReq.SubscriptionID, expTime)
@@ -125,8 +100,10 @@ func CreateUserSubscription(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// READ
+
 //Get a user's subscription
-func GetUserSubscription(res http.ResponseWriter, req *http.Request) {
+func ReadUserSubscription(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.UserSubscriptionResponse{}
 	queryVars := req.URL.Query()
 
@@ -145,11 +122,12 @@ func GetUserSubscription(res http.ResponseWriter, req *http.Request) {
 		if convErr != nil {
 			bodyRes.Response = "id was unable to be converted to int"
 			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-		}
-		if validUserErr != nil && validAdminErr != nil {
+			return
+		} else if validUserErr != nil && validAdminErr != nil {
 			fmt.Println(validUserErr.Error())
 			bodyRes.Response = "user does not have permission or an error occurred"
-			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+			responses.UserSubscription(res, bodyRes, http.StatusForbidden)
+			return
 		} else if validAdminErr == nil { //If request is from admin with perms
 			userSub, userSubErr := db.ReadUserSubscriptionFromID(userSubscriptionID)
 			if userSubErr != nil {
@@ -180,7 +158,7 @@ func GetUserSubscription(res http.ResponseWriter, req *http.Request) {
 }
 
 //Get all users subscriptions
-func GetAllUserSubscriptions(res http.ResponseWriter, req *http.Request) {
+func ReadAllUserSubscriptions(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.DumpUserSubscriptionResponse{}
 	bearerToken := req.Header.Get("Bearer")
 	adminPerms := []int{db.USER_SUBSCRIPTION_VIEW_ALL}
@@ -201,4 +179,139 @@ func GetAllUserSubscriptions(res http.ResponseWriter, req *http.Request) {
 	bodyRes.Response = "dumped database table successfully"
 	bodyRes.UserSubscription = userSubs
 	responses.DumpUserSubscription(res, bodyRes, http.StatusAccepted)
+}
+
+// UPDATE
+
+//Edits a user's subscription
+func UpdateUserSubscription(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	queryVars := req.URL.Query()
+
+	userSubIDStr := queryVars.Get("id")
+	usedBWStr := queryVars.Get("usedBandwidth")
+	expiryStr := queryVars.Get("expiry")
+
+	bearerToken := req.Header.Get("Bearer") // Bearer token
+
+	//NEEDS TO BE REMOVED FOR PAYMENT!!!
+	userPerms := []int{db.PERSONAL_USER_SUBSCRIPTION_MODIFY} //db.SUBSCRIPTION_MODIFY_ALL
+	username, validUserErr := db.ValidatePerms(bearerToken, userPerms)
+	// REMOVE FOR PAYMENT!! WILL CAUSE SECURITY ISSUE
+
+	adminPerms := []int{db.USER_SUBSCRIPTION_MODIFY_ALL} //db.SUBSCRIPTION_MODIFY_ALL
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if userSubIDStr == "" {
+		bodyRes.Response = "id needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if usedBWStr == "" && expiryStr == "" {
+		bodyRes.Response = "usedBandwidth or expiry needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	userSubID, errConv := strconv.Atoi(userSubIDStr)
+	if errConv != nil {
+		bodyRes.Response = "could not convert id to integer"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	usedBW, errConv := strconv.Atoi(usedBWStr)
+	if errConv != nil {
+		bodyRes.Response = "could not convert usedBandwidth to integer"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	expiry, timeErr := time.Parse(time.RFC822, expiryStr)
+	if timeErr != nil {
+		bodyRes.Response = "expiry is not in correct time format"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if errConv != nil {
+		bodyRes.Response = "Could not convert usedBandwidth to integer"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if validUserErr != nil && validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	} else if validUserErr == nil { //If incoming request is not from admin, run this
+		validationErr := db.ValidateUsernameUserSubscription(username, userSubID)
+		if validationErr != nil {
+			bodyRes.Response = validationErr.Error()
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+	}
+	// No need to check admin, it is assumed from logic they are allowed.
+	errUpdate := db.UpdateUserSubscription(userSubID, usedBW, expiry)
+	if errUpdate != nil {
+		bodyRes.Response = errUpdate.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "updated userSubscription successfully"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
+}
+
+// DELETE
+
+//Deletes a user's usersubscription
+func DeleteUserSubscription(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	queryVars := req.URL.Query()
+
+	userSubIDStr := queryVars.Get("id")
+
+	bearerToken := req.Header.Get("Bearer") // Bearer token
+
+	//NEED TO CANCEL SUBSCRIPTION PAYMENT
+	userPerms := []int{db.PERSONAL_USER_SUBSCRIPTION_DELETE} //db.SUBSCRIPTION_MODIFY_ALL
+	username, validUserErr := db.ValidatePerms(bearerToken, userPerms)
+
+	adminPerms := []int{db.USER_SUBSCRIPTION_MODIFY_ALL} //db.SUBSCRIPTION_MODIFY_ALL
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if userSubIDStr == "" {
+		bodyRes.Response = "id needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	userSubID, errConv := strconv.Atoi(userSubIDStr)
+	if errConv != nil {
+		bodyRes.Response = "could not convert id to integer"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if validUserErr != nil && validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	} else if validUserErr == nil { //If incoming request is not from admin, run this
+		validationErr := db.ValidateUsernameUserSubscription(username, userSubID)
+		if validationErr != nil {
+			bodyRes.Response = validationErr.Error()
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+	}
+	// No need to check admin, it is assumed from logic they are allowed.
+	errDelete := db.DeleteUserSubscription(userSubID)
+	if errDelete != nil {
+		bodyRes.Response = errDelete.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "Deleted usersubscription successfully"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }

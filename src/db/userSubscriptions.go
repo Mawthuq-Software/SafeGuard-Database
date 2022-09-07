@@ -81,9 +81,9 @@ func ReadUserSubscriptionWithSubscriptionID(subscriptionID int) (userSubs []User
 
 // UPDATE
 
-func UpdateUserSubscription(subscriptionID int, usedBandwidth int, expiry time.Time) (err error) {
+func UpdateUserSubscription(userSubID int, usedBandwidth int, expiry time.Time) (err error) {
 	db := DBSystem
-	subs, err := ReadUserSubscriptionFromID(subscriptionID)
+	subs, err := ReadUserSubscriptionFromID(userSubID)
 	if err != nil {
 		return
 	}
@@ -104,9 +104,9 @@ func UpdateUserSubscription(subscriptionID int, usedBandwidth int, expiry time.T
 
 // DELETE
 
-func DeleteUserSubscription(subscriptionID int) (err error) {
+func DeleteUserSubscription(userSubID int) (err error) {
 	db := DBSystem
-	subs, err := ReadUserSubscriptionFromID(subscriptionID)
+	subs, err := ReadUserSubscriptionFromID(userSubID)
 	if err != nil {
 		return
 	}
