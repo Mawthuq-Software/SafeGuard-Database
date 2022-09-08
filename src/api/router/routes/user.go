@@ -47,7 +47,7 @@ func AddUser(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	queryError := db.AddUser(bodyReq.Username, bodyReq.Password, bodyReq.Email)
+	queryError := db.CreateUser(bodyReq.Username, bodyReq.Password, bodyReq.Email)
 	if queryError != nil {
 		bodyRes.Response = queryError.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

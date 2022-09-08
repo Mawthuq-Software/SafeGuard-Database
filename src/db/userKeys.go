@@ -12,7 +12,7 @@ import (
 func createUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	db := DBSystem
 
-	_, err = FindUserFromUserID(userID)
+	_, err = ReadUser(userID)
 	if err != nil {
 		return
 	}

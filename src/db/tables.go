@@ -72,7 +72,7 @@ type Servers struct {
 	Name       string `gorm:"unique"`
 	Region     string
 	Country    string
-	IPAddress  string
+	IPAddress  string `gorm:"unique"`
 	Online     bool
 	LastOnline time.Time
 }

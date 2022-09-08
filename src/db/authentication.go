@@ -21,7 +21,7 @@ func FindAuthFromUsername(username string) (Authentications, error) {
 }
 
 func FindAuthFromUserID(userID int) (auth Authentications, err error) {
-	user, err := FindUserFromUserID(userID)
+	user, err := ReadUser(userID)
 	if err != nil {
 		return
 	}

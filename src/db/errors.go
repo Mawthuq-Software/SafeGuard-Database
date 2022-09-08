@@ -21,9 +21,10 @@ var (
 	ErrCreatingUserSubscription   = errors.New("error creating a user subscription")
 	ErrUsersSubscriptionExists    = errors.New("user(s) with existing user subscriptions")
 	//Subscription
-	ErrSubscriptionNotFound = errors.New("subscription was not found")
-	ErrSubscriptionExpired  = errors.New("subscription has expired")
-	ErrSubscriptionKeyMaxed = errors.New("user has maxed out all available keys")
+	ErrSubscriptionNotFound      = errors.New("subscription was not found")
+	ErrSubscriptionExpired       = errors.New("subscription has expired")
+	ErrSubscriptionKeyMaxed      = errors.New("user has maxed out all available keys")
+	ErrSubscriptionUserSubExists = errors.New("user subscriptions with subscription ID exist, delete them first")
 	//Group
 	ErrGroupNotFound = errors.New("group was not found")
 	//GroupPolicy
@@ -45,7 +46,11 @@ var (
 	ErrMissingPermission     = errors.New("entity does not have permission to perform this function")
 	ErrInvalidUserPermission = errors.New("user does not have valid permission")
 	//Server
-	ErrServerNotFound = errors.New("server not found")
+	ErrServerNotFound  = errors.New("server not found")
+	ErrServerIPInvalid = errors.New("ip address is not valid")
+	ErrServerSaving    = errors.New("an error occurred when saving")
+	ErrDeletingServer  = errors.New("an error occurred when deleting server")
+	ErrServerKeysExist = errors.New("keys with this server exist, delete them first")
 	//Key
 	ErrCreatingKey               = errors.New("issue creating key in database")
 	ErrDeletingKey               = errors.New("error deleting key from database")

@@ -72,7 +72,7 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := db.FindUserFromUserID(userID)
+	user, err := db.ReadUser(userID)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

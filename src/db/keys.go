@@ -12,7 +12,7 @@ import (
 // Adds a key to the database and returns the keyID
 func createKey(serverID int, publicKey string, presharedKey string) (keyID int, err error) {
 	db := DBSystem
-	_, err = findServerFromServerID(serverID)
+	_, err = ReadServer(serverID)
 	if err != nil {
 		return
 	}
@@ -90,6 +90,19 @@ func ReadAllKeys() (keys []Keys, err error) {
 	dbResult := db.Find(&keys)
 	err = dbResult.Error
 	return keys, err
+}
+
+func readKeysWithServerID(serverID int) (keys []Keys, err error) {
+	db := DBSystem
+
+	keyQuery := db.Where("serverID = ?", serverID).Find(&keys)
+	if errors.Is(keyQuery.Error, gorm.ErrRecordNotFound) {
+		err = ErrKeyNotFound
+	} else if keyQuery.Error != nil {
+		combinedLogger.Error("Finding key " + keyQuery.Error.Error())
+		err = ErrQuery
+	}
+	return
 }
 
 //UPDATE

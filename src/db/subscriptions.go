@@ -96,15 +96,13 @@ func DeleteSubscription(subscriptionID int) (err error) {
 	db := DBSystem
 	var userSubs []UserSubscriptions
 
-	findUserSubs := db.Where("subscription_id = ?", subscriptionID).Find(&userSubs)
-	if !errors.Is(findUserSubs.Error, gorm.ErrRecordNotFound) {
-		err = ErrUsersSubscriptionExists
-		return
-	}
-	_, err = ReadUserSubscriptionWithSubscriptionID(subscriptionID)
+	userSubs, err = ReadUserSubscriptionWithSubscriptionID(subscriptionID)
 	if err != nil && err != ErrUserSubscriptionsNotFound { // check error is valid
 		return err
+	} else if len(userSubs) > 0 {
+		return ErrSubscriptionUserSubExists
 	}
+
 	delErr := db.Delete(&userSubs)
 	if delErr.Error != nil {
 		err = delErr.Error
