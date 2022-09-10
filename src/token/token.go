@@ -8,14 +8,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GenerateUser(userID string, expiryTime time.Time) (string, error) {
+type customClaims struct {
+	UserID int `json:"userID"`
+	jwt.RegisteredClaims
+}
+
+func GenerateUser(userID int, expiryTime time.Time) (string, error) {
 	issuer := viper.GetString("TOKEN.STRING")
 	secretKey := viper.GetString("TOKEN.SECRETKEY")
 	numericDate := jwt.NewNumericDate(expiryTime)
 
-	claims := jwt.MapClaims{
-		"UserID": userID,
-		"RegisteredClaims": jwt.RegisteredClaims{
+	claims := customClaims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    issuer,
 			ExpiresAt: numericDate,
 		},
@@ -26,21 +31,28 @@ func GenerateUser(userID string, expiryTime time.Time) (string, error) {
 	return signedToken, err
 }
 
-func ValidateUser(tokenStr string) (string, error) {
+func ValidateUser(tokenStr string) (userID int, err error) {
 	secretKey := viper.GetString("TOKEN.SECRETKEY")
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(secretKey), nil
-	})
-
-	claims, valid := token.Claims.(jwt.MapClaims)
+	token, err := jwt.ParseWithClaims(tokenStr, &customClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			// Don't forget to validate the alg is what you expect:
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte(secretKey), nil
+		})
+	if err != nil {
+		return
+	}
+	claims, valid := token.Claims.(*customClaims)
+	//NEED TO PARSE TOKEN!!
 	if valid && token.Valid {
-		return claims["UserID"].(string), nil
+		userIDTokenInterface := claims.UserID
+		if userIDTokenInterface == 0 {
+			return 0, fmt.Errorf("token is not valid")
+		}
+		return userIDTokenInterface, nil
 	} else {
-		return "", err
+		return 0, fmt.Errorf("token is not valid")
 	}
 }

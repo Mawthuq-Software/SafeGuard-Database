@@ -137,7 +137,7 @@ func LoginWithUsername(username string, password string) (string, error) {
 		return "", ErrMissingPermission
 	}
 	tokenLifetime := time.Now().AddDate(0, 0, 7)
-	generatedToken, tokenErr := token.GenerateUser(username, tokenLifetime)
+	generatedToken, tokenErr := token.GenerateUser(userQuery.ID, tokenLifetime)
 	if tokenErr != nil {
 		combinedLogger.Error("Generating token " + tokenErr.Error())
 		return "", ErrCreatingToken

@@ -12,7 +12,7 @@ func NewRouter() *mux.Router {
 	router.Use(setHeader)     //need to allow CORS and OPTIONS
 
 	user := router.PathPrefix("/user").Subrouter()
-	user.HandleFunc("/add", routes.AddUser).Methods("POST")
+	user.HandleFunc("/register", routes.AddUser).Methods("POST")
 	user.HandleFunc("/login", routes.LoginWithUsername).Methods("POST")
 	user.HandleFunc("/change-password", routes.ChangeUserPassword).Methods("POST")
 
@@ -38,6 +38,13 @@ func NewRouter() *mux.Router {
 
 	token := router.PathPrefix("/token").Subrouter()
 	token.HandleFunc("/validate", routes.Validate).Methods("POST")
+
+	server := router.PathPrefix("/server").Subrouter()
+	server.HandleFunc("/", routes.CreateServer).Methods("POST")
+	server.HandleFunc("/", routes.ReadServer).Methods("GET")
+	server.HandleFunc("/all", routes.ReadAllServers).Methods("GET")
+	server.HandleFunc("/", routes.UpdateServer).Methods("PUT")
+	server.HandleFunc("/", routes.DeleteServer).Methods("DELETE")
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router

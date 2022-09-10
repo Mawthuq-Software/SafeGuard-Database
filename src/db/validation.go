@@ -1,8 +1,6 @@
 package db
 
 import (
-	"strconv"
-
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/token"
 )
 
@@ -11,17 +9,12 @@ func ValidatePerms(bearerToken string, perms []int) (userIDInt int, err error) {
 		err = ErrBearerEmpty
 		return
 	}
-	userIDStr, tokenErr := token.ValidateUser(bearerToken) //validate bearer token
+	userID, tokenErr := token.ValidateUser(bearerToken) //validate bearer token
 	if tokenErr != nil {
 		err = ErrBearerInvalid
 		return
 	}
-	userIDInt, userIDErr := strconv.Atoi(userIDStr)
-	if userIDErr != nil {
-		err = userIDErr
-		return
-	}
-	user, userErr := FindAuthFromUserID(userIDInt) //find user info from bearer
+	user, userErr := FindAuthFromUserID(userID) //find user info from bearer
 	if userErr != nil {
 		err = userErr
 		return

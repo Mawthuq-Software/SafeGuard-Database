@@ -46,6 +46,11 @@ type ServerResponse struct {
 	Server db.Servers `json:"server"`
 }
 
+type DumpServerResponse struct {
+	StandardResponse
+	Servers []db.Servers `json:"servers"`
+}
+
 func Standard(res http.ResponseWriter, resStruct StandardResponse, httpStatusCode int) {
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(httpStatusCode)
@@ -96,6 +101,13 @@ func DumpSubscriptions(res http.ResponseWriter, resStruct DumpSubscriptionRespon
 }
 
 func Server(res http.ResponseWriter, resStruct ServerResponse, httpStatusCode int) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(httpStatusCode)
+	jsonResp, _ := json.Marshal(resStruct)
+	res.Write(jsonResp)
+}
+
+func DumpServers(res http.ResponseWriter, resStruct DumpServerResponse, httpStatusCode int) {
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(httpStatusCode)
 	jsonResp, _ := json.Marshal(resStruct)

@@ -42,6 +42,7 @@ const (
 	USER_SUBSCRIPTION_MODIFY_ALL int = 2009
 	USER_SUBSCRIPTION_VIEW_ALL   int = 2010
 	SERVER_ADD_ALL               int = 2013
+	SERVER_MODIFY_ALL            int = 2014
 )
 
 func startupCreation() {
