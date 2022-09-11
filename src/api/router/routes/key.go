@@ -41,11 +41,16 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.StandardResponse{}
 
 	bearerToken := req.Header.Get("Bearer")
-	perms := []int{db.PERSONAL_KEYS_ADD, db.KEYS_ADD_ALL}
-	userID, validErr := db.ValidatePerms(bearerToken, perms)
-	if validErr != nil {
+
+	userPerms := []int{db.PERSONAL_KEYS_ADD, db.KEYS_ADD_ALL} //check perms
+	userID, userValidErr := db.ValidatePerms(bearerToken, userPerms)
+
+	adminPerms := []int{db.KEYS_MODIFY_ALL}
+	_, adminValidErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if userValidErr != nil && adminValidErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		responses.Standard(res, bodyRes, http.StatusForbidden)
 		return
 	}
 
@@ -70,15 +75,22 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 		bodyRes.Response = "client presharedKey cannot be empty"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
+	} else if userValidErr == nil {
+		user, err := db.ReadUser(userID)
+		if err != nil {
+			bodyRes.Response = err.Error()
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		if user.ID != userID { //verify user is the actual user
+			bodyRes.Response = "user does not have permission or an error occurred"
+			responses.Standard(res, bodyRes, http.StatusForbidden)
+			return
+		}
 	}
 
-	user, err := db.ReadUser(userID)
-	if err != nil {
-		bodyRes.Response = err.Error()
-		responses.Standard(res, bodyRes, http.StatusBadRequest)
-		return
-	}
-	err = db.CreateKeyAndLink(user.ID, bodyReq.ServerID, bodyReq.PublicKey, bodyReq.PresharedKey)
+	// We assume based on logic user is either admin or a user with permission
+	err = db.CreateKeyAndLink(userID, bodyReq.ServerID, bodyReq.PublicKey, bodyReq.PresharedKey)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

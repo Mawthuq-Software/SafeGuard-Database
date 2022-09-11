@@ -85,22 +85,9 @@ type KeyIPv4 struct {
 	PrivateIPv4 PrivateIPv4 `gorm:"foreignKey:IPv4ID"`
 }
 
-type PublicIPv4 struct {
-	StandardModel
-	Address string
-}
-
 type PrivateIPv4 struct {
 	StandardModel
 	Address string
-}
-
-type IPv4Interfaces struct {
-	StandardModel
-	InterfaceID         int
-	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
-	IPv4ID              int
-	PublicIPv4          PublicIPv4 `gorm:"foreignKey:IPv4ID"`
 }
 
 type KeyIPv6 struct {
@@ -111,28 +98,17 @@ type KeyIPv6 struct {
 	PrivateIPv6 PrivateIPv6 `gorm:"foreignKey:IPv6ID"`
 }
 
-type PublicIPv6 struct {
-	StandardModel
-	Address string
-}
-
 type PrivateIPv6 struct {
 	StandardModel
 	Address string
 }
 
-type IPv6Interfaces struct {
-	StandardModel
-	InterfaceID         int
-	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`
-	IPv6ID              int
-	PublicIPv6          PublicIPv6 `gorm:"foreignKey:IPv6ID"`
-}
-
 type WireguardInterfaces struct {
 	StandardModel
-	ListenPort int
-	PublicKey  string
+	ListenPort  int
+	PublicKey   string
+	IPv4Address string
+	IPv6Address string
 }
 
 type ServerInterfaces struct {

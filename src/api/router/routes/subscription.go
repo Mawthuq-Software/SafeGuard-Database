@@ -27,7 +27,11 @@ func CreateSubscription(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if bodyReq.NumberOfKeys < 0 {
+	if bodyReq.Name == "" {
+		bodyRes.Response = "name must be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if bodyReq.NumberOfKeys < 0 {
 		bodyRes.Response = "numberOfKeys must be >= 0"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return

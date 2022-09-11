@@ -35,5 +35,5 @@ func ValidatePerms(bearerToken string, perms []int) (userIDInt int, err error) {
 		err = ErrInvalidUserPermission
 		return
 	}
-	return
+	return user.ID, err
 }

@@ -39,9 +39,8 @@ func DBStart() {
 		&Policies{}, &Groups{}, &GroupPolicies{},
 		&Authentications{}, &UserGroups{}, &Users{},
 		&UserKeys{}, &Keys{}, &Servers{},
-		&KeyIPv4{}, &PublicIPv4{}, &PrivateIPv4{},
-		&IPv4Interfaces{}, &KeyIPv6{}, &PublicIPv6{},
-		&PrivateIPv6{}, &IPv6Interfaces{}, &WireguardInterfaces{},
+		&KeyIPv4{}, &PrivateIPv4{}, &KeyIPv6{},
+		&PrivateIPv6{}, &WireguardInterfaces{},
 		&ServerInterfaces{}, &ServerTokens{}, &Tokens{},
 		&ServerConfigurations{}, &Configurations{}, &Subscriptions{},
 		&UserSubscriptions{}) //Migrate tables to sqlite
