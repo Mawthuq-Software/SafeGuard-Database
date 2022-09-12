@@ -22,6 +22,7 @@ var (
 	ErrUsersSubscriptionExists    = errors.New("user(s) with existing user subscriptions")
 	//Subscription
 	ErrSubscriptionNotFound      = errors.New("subscription was not found")
+	ErrSubscriptionExists        = errors.New("subscription exists")
 	ErrSubscriptionExpired       = errors.New("subscription has expired")
 	ErrSubscriptionKeyMaxed      = errors.New("user has maxed out all available keys")
 	ErrSubscriptionUserSubExists = errors.New("user subscriptions with subscription ID exist, delete them first")

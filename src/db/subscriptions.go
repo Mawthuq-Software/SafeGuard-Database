@@ -12,7 +12,7 @@ import (
 func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
 	db := DBSystem
 	_, err = ReadSubscriptionByName(name)
-	if err != ErrSubscriptionNotFound {
+	if err == ErrSubscriptionNotFound {
 		newSub := Subscriptions{Name: name, NumberOfKeys: numKeys, TotalBandwidth: totalBandwidth}
 		createErr := db.Create(&newSub)
 		if createErr != nil {
@@ -21,7 +21,7 @@ func CreateSubscription(name string, numKeys int, totalBandwidth int) (err error
 		}
 		return nil
 	}
-	return
+	return ErrSubscriptionExists
 }
 
 // READ

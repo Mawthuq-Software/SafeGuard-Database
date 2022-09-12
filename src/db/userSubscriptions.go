@@ -154,6 +154,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 	return nil
 }
 
+//Validates the user has the subscription ID
 func ValidateUsernameUserSubscription(userID int, userSubID int) (err error) {
 	findUser, findUserErr := ReadUser(userID)
 	if findUserErr != nil {

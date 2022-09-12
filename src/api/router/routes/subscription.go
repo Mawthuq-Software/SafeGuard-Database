@@ -58,7 +58,7 @@ func CreateSubscription(res http.ResponseWriter, req *http.Request) {
 			responses.Standard(res, bodyRes, http.StatusBadRequest)
 			return
 		}
-		bodyRes.Response = "added user subscription successfully"
+		bodyRes.Response = "added subscription successfully"
 		responses.Standard(res, bodyRes, http.StatusAccepted)
 		return
 
@@ -93,6 +93,8 @@ func ReadSubscription(res http.ResponseWriter, req *http.Request) {
 		}
 		bodyRes.Subscription = sub
 		bodyRes.Response = "pulled subscription successfully"
+		responses.Subscription(res, bodyRes, http.StatusAccepted)
+		return
 	} else if subscriptionName != "" {
 		sub, subErr := db.ReadSubscriptionByName(subscriptionName)
 		if subErr != nil {
@@ -102,7 +104,7 @@ func ReadSubscription(res http.ResponseWriter, req *http.Request) {
 		}
 		bodyRes.Subscription = sub
 		bodyRes.Response = "pulled subscription successfully"
-		responses.Subscription(res, bodyRes, http.StatusBadRequest)
+		responses.Subscription(res, bodyRes, http.StatusAccepted)
 		return
 	} else {
 		bodyRes.Response = "id or name query must be filled"

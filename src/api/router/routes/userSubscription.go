@@ -128,17 +128,6 @@ func ReadUserSubscription(res http.ResponseWriter, req *http.Request) {
 			bodyRes.Response = "user does not have permission or an error occurred"
 			responses.UserSubscription(res, bodyRes, http.StatusForbidden)
 			return
-		} else if validAdminErr == nil { //If request is from admin with perms
-			userSub, userSubErr := db.ReadUserSubscriptionFromID(userSubscriptionID)
-			if userSubErr != nil {
-				bodyRes.Response = userSubErr.Error()
-				responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
-				return
-			}
-			bodyRes.UserSubscription = userSub
-			bodyRes.Response = "pulled user subscription successfully"
-			responses.UserSubscription(res, bodyRes, http.StatusAccepted)
-			return
 		} else if validUserErr == nil { //If incoming request is not from admin, run this
 			validationErr := db.ValidateUsernameUserSubscription(userID, userSubscriptionID)
 			if validationErr != nil {
@@ -146,11 +135,66 @@ func ReadUserSubscription(res http.ResponseWriter, req *http.Request) {
 				responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
 				return
 			}
-		} else {
-			bodyRes.Response = "an error occurred"
-			responses.UserSubscription(res, bodyRes, http.StatusInternalServerError)
+		}
+		//assume permission is admin or user is allowed to
+		userSub, userSubErr := db.ReadUserSubscriptionFromID(userSubscriptionID)
+		if userSubErr != nil {
+			bodyRes.Response = userSubErr.Error()
+			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
 			return
 		}
+		bodyRes.UserSubscription = userSub
+		bodyRes.Response = "pulled user subscription successfully"
+		responses.UserSubscription(res, bodyRes, http.StatusAccepted)
+		return
+	} else { //param is empty
+		bodyRes.Response = "id needs to be filled"
+		responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+	}
+}
+
+//Get a user's subscription from their user ID
+func ReadUserSubscriptionFromUserID(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.UserSubscriptionResponse{}
+	queryVars := req.URL.Query()
+
+	userSubIDStr := queryVars.Get("id")
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+	userPerms := []int{db.PERSONAL_USER_SUBSCRIPTION_VIEW}
+	userID, validUserErr := db.ValidatePerms(bearerToken, userPerms)
+
+	adminPerms := []int{db.USER_SUBSCRIPTION_VIEW_ALL}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if userSubIDStr != "" { //check param
+		userIDInt, convErr := strconv.Atoi(userSubIDStr) //convert param to int
+		if convErr != nil {
+			bodyRes.Response = "id was unable to be converted to int"
+			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+			return
+		} else if validUserErr != nil && validAdminErr != nil {
+			bodyRes.Response = "user does not have permission or an error occurred"
+			responses.UserSubscription(res, bodyRes, http.StatusForbidden)
+			return
+		} else if validUserErr == nil { //If incoming request is not from admin, run this
+			if userIDInt != userID {
+				bodyRes.Response = "user does not have permission or an error occurred"
+				responses.UserSubscription(res, bodyRes, http.StatusForbidden)
+				return
+			}
+		}
+		//assume admin is present or user has permission
+		userSub, userSubErr := db.ReadUserSubscriptionFromUserID(userID)
+		if userSubErr != nil {
+			bodyRes.Response = userSubErr.Error()
+			responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		bodyRes.UserSubscription = userSub
+		bodyRes.Response = "pulled user subscription successfully"
+		responses.UserSubscription(res, bodyRes, http.StatusAccepted)
 	} else { //param is empty
 		bodyRes.Response = "id needs to be filled"
 		responses.UserSubscription(res, bodyRes, http.StatusBadRequest)
