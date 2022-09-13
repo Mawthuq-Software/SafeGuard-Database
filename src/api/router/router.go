@@ -17,25 +17,25 @@ func NewRouter() *mux.Router {
 	user.HandleFunc("/change-password", routes.ChangeUserPassword).Methods("POST") // DONE
 
 	userSubscription := user.PathPrefix("/subscription").Subrouter()
-	userSubscription.HandleFunc("/", routes.CreateUserSubscription).Methods("POST")
-	userSubscription.HandleFunc("/", routes.ReadUserSubscription).Methods("GET")
-	userSubscription.HandleFunc("/userid", routes.ReadUserSubscriptionFromUserID).Methods("GET") // Partially DONE
-	userSubscription.HandleFunc("/all", routes.ReadAllUserSubscriptions).Methods("GET")
-	userSubscription.HandleFunc("/", routes.UpdateUserSubscription).Methods("PUT")
-	userSubscription.HandleFunc("/", routes.DeleteUserSubscription).Methods("DELETE")
+	userSubscription.HandleFunc("/", routes.CreateUserSubscription).Methods("POST")              // DONE
+	userSubscription.HandleFunc("/", routes.ReadUserSubscription).Methods("GET")                 // DONE
+	userSubscription.HandleFunc("/userid", routes.ReadUserSubscriptionFromUserID).Methods("GET") // DONE
+	userSubscription.HandleFunc("/all", routes.ReadAllUserSubscriptions).Methods("GET")          // DONE
+	userSubscription.HandleFunc("/", routes.UpdateUserSubscription).Methods("PUT")               // DONE
+	userSubscription.HandleFunc("/", routes.DeleteUserSubscription).Methods("DELETE")            // DONE
 
 	subscription := router.PathPrefix("/subscription").Subrouter()
 	subscription.HandleFunc("/", routes.CreateSubscription).Methods("POST")     // DONE
 	subscription.HandleFunc("/", routes.ReadSubscription).Methods("GET")        // DONE
 	subscription.HandleFunc("/all", routes.ReadAllSubscriptions).Methods("GET") // DONE
-	subscription.HandleFunc("/", routes.UpdateSubscription).Methods("PUT")      // CHANGE THIS
-	subscription.HandleFunc("/", routes.DeleteSubscription).Methods("DELETE")
+	subscription.HandleFunc("/", routes.UpdateSubscription).Methods("PUT")      // DONE
+	subscription.HandleFunc("/", routes.DeleteSubscription).Methods("DELETE")   // DONE
 
 	key := router.PathPrefix("/key").Subrouter()
 	key.HandleFunc("/add", routes.AddKey).Methods("POST")                    // DONE
-	key.HandleFunc("/delete", routes.DeleteKey).Methods("POST")              //NOT DONE
-	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST") //NOT DONE
-	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("POST")            //NOT DONE
+	key.HandleFunc("/delete", routes.DeleteKey).Methods("POST")              // NOT DONE
+	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST") // NOT DONE
+	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("POST")            // NOT DONE
 
 	token := router.PathPrefix("/token").Subrouter()
 	token.HandleFunc("/validate", routes.Validate).Methods("POST")

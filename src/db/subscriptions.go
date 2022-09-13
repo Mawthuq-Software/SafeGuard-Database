@@ -69,19 +69,9 @@ func ReadAllSubscriptions() (subscriptions []Subscriptions, err error) {
 // UPDATE
 
 //Updates a subscription. Use -1 for numKeys or totalBandwidth to keep current value.
-func UpdateSubscription(name string, numKeys int, totalBandwidth int) (err error) {
+func UpdateSubscription(subs Subscriptions) (err error) {
 	db := DBSystem
-	subs, err := ReadSubscriptionByName(name)
-	if err != nil {
-		return
-	}
 
-	if numKeys > -1 {
-		subs.NumberOfKeys = numKeys
-	}
-	if totalBandwidth > -1 {
-		subs.TotalBandwidth = totalBandwidth
-	}
 	saveErrs := db.Save(&subs)
 	if saveErrs.Error != nil {
 		err = saveErrs.Error
@@ -93,7 +83,6 @@ func UpdateSubscription(name string, numKeys int, totalBandwidth int) (err error
 // DELETE
 
 func DeleteSubscription(subscriptionID int) (err error) {
-	db := DBSystem
 	var userSubs []UserSubscriptions
 
 	userSubs, err = ReadUserSubscriptionWithSubscriptionID(subscriptionID)
@@ -103,9 +92,9 @@ func DeleteSubscription(subscriptionID int) (err error) {
 		return ErrSubscriptionUserSubExists
 	}
 
-	delErr := db.Delete(&userSubs)
-	if delErr.Error != nil {
-		err = delErr.Error
+	delErr := deleteSubscriptionByID(subscriptionID)
+	if delErr != nil {
+		err = delErr
 		return
 	}
 	return nil
@@ -118,4 +107,15 @@ func DeleteSubscriptionByName(name string) (err error) {
 	}
 	err = DeleteSubscription(subs.ID)
 	return
+}
+
+func deleteSubscriptionByID(subscriptionID int) (err error) {
+	db := DBSystem
+
+	delErr := db.Delete(&Subscriptions{}, subscriptionID)
+	if delErr.Error != nil {
+		err = delErr.Error
+		return
+	}
+	return nil
 }

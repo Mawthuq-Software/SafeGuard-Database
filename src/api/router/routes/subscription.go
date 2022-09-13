@@ -158,8 +158,12 @@ func UpdateSubscription(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	numKeys := -1
-	totalBW := -1
+	subs, err := db.ReadSubscriptionByName(subscriptionName)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
 
 	if numberOfKeys != "" {
 		numKeysInt, convErr := strconv.Atoi(numberOfKeys)
@@ -173,7 +177,7 @@ func UpdateSubscription(res http.ResponseWriter, req *http.Request) {
 			responses.Standard(res, bodyRes, http.StatusBadRequest)
 			return
 		}
-		numKeys = numKeysInt
+		subs.NumberOfKeys = numKeysInt
 	}
 	if totalBandwidth != "" {
 		totalBWInt, convErr := strconv.Atoi(totalBandwidth)
@@ -187,16 +191,17 @@ func UpdateSubscription(res http.ResponseWriter, req *http.Request) {
 			responses.Standard(res, bodyRes, http.StatusBadRequest)
 			return
 		}
-		totalBW = totalBWInt
+		subs.TotalBandwidth = totalBWInt
 	}
-	updateErr := db.UpdateSubscription(subscriptionName, numKeys, totalBW)
+
+	updateErr := db.UpdateSubscription(subs)
 	if updateErr != nil {
 		bodyRes.Response = updateErr.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
 	bodyRes.Response = "Updated subscription successfully"
-	responses.Standard(res, bodyRes, http.StatusBadRequest)
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }
 
 func DeleteSubscription(res http.ResponseWriter, req *http.Request) {

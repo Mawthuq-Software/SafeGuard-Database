@@ -205,12 +205,12 @@ func ReadUserSubscriptionFromUserID(res http.ResponseWriter, req *http.Request) 
 func ReadAllUserSubscriptions(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.DumpUserSubscriptionResponse{}
 	bearerToken := req.Header.Get("Bearer")
-	adminPerms := []int{db.USER_SUBSCRIPTION_VIEW_ALL}
+	adminPerms := []int{db.USER_SUBSCRIPTION_VIEW_ALL, db.PERSONAL_KEYS_ADD}
 
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 	if validAdminErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.DumpUserSubscription(res, bodyRes, http.StatusBadRequest)
+		responses.DumpUserSubscription(res, bodyRes, http.StatusForbidden)
 		return
 	}
 
@@ -238,12 +238,10 @@ func UpdateUserSubscription(res http.ResponseWriter, req *http.Request) {
 
 	bearerToken := req.Header.Get("Bearer") // Bearer token
 
-	//NEEDS TO BE REMOVED FOR PAYMENT!!!
-	userPerms := []int{db.PERSONAL_USER_SUBSCRIPTION_MODIFY} //db.SUBSCRIPTION_MODIFY_ALL
+	userPerms := []int{db.PERSONAL_USER_SUBSCRIPTION_MODIFY}
 	username, validUserErr := db.ValidatePerms(bearerToken, userPerms)
-	// REMOVE FOR PAYMENT!! WILL CAUSE SECURITY ISSUE
 
-	adminPerms := []int{db.USER_SUBSCRIPTION_MODIFY_ALL} //db.SUBSCRIPTION_MODIFY_ALL
+	adminPerms := []int{db.USER_SUBSCRIPTION_MODIFY_ALL}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
 	if userSubIDStr == "" {
