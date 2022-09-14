@@ -132,7 +132,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 
 		return
 	}
-	if userSubscription.Expiry.After(time.Now()) {
+	if userSubscription.Expiry.Before(time.Now()) {
 		err = ErrSubscriptionExpired
 		return
 	}
@@ -144,7 +144,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 
 	numKeys := subscription.NumberOfKeys
 	userKeys, err := readUserKeys(userID)
-	if err != nil {
+	if err != nil && err != ErrKeyNotFound {
 		return
 	}
 	if len(userKeys) >= numKeys {

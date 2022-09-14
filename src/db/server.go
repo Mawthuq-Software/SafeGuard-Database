@@ -14,6 +14,11 @@ func CreateServer(name string, region string, country string, ipAddressStr strin
 	if net.ParseIP(ipAddressStr) == nil {
 		return ErrServerIPInvalid
 	}
+	_, findErr := ReadServerFromServerName(name)
+	if findErr != ErrServerNotFound || findErr == nil {
+		return ErrServerNameExist
+	}
+
 	server := Servers{Name: name, Region: region, Country: country, IPAddress: ipAddressStr}
 	createErr := db.Create(&server)
 	if createErr.Error != nil {

@@ -52,6 +52,7 @@ var (
 	ErrServerSaving    = errors.New("an error occurred when saving")
 	ErrDeletingServer  = errors.New("an error occurred when deleting server")
 	ErrServerKeysExist = errors.New("keys with this server exist, delete them first")
+	ErrServerNameExist = errors.New("server with same name already exists")
 	//Key
 	ErrCreatingKey               = errors.New("issue creating key in database")
 	ErrDeletingKey               = errors.New("error deleting key from database")

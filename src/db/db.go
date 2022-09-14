@@ -38,7 +38,7 @@ func DBStart() {
 	errMigrate := db.AutoMigrate(
 		&Policies{}, &Groups{}, &GroupPolicies{},
 		&Authentications{}, &UserGroups{}, &Users{},
-		&UserKeys{}, &Keys{}, &Servers{},
+		&UserKeys{}, &VPNKeys{}, &Servers{},
 		&KeyIPv4{}, &PrivateIPv4{}, &KeyIPv6{},
 		&PrivateIPv6{}, &WireguardInterfaces{},
 		&ServerInterfaces{}, &ServerTokens{}, &Tokens{},

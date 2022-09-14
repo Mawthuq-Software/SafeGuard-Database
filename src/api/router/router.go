@@ -32,20 +32,20 @@ func NewRouter() *mux.Router {
 	subscription.HandleFunc("/", routes.DeleteSubscription).Methods("DELETE")   // DONE
 
 	key := router.PathPrefix("/key").Subrouter()
-	key.HandleFunc("/add", routes.AddKey).Methods("POST")                    // DONE
+	key.HandleFunc("/", routes.AddKey).Methods("POST")                       // DONE
 	key.HandleFunc("/delete", routes.DeleteKey).Methods("POST")              // NOT DONE
 	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST") // NOT DONE
 	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("POST")            // NOT DONE
 
 	token := router.PathPrefix("/token").Subrouter()
-	token.HandleFunc("/validate", routes.Validate).Methods("POST")
+	token.HandleFunc("/validate", routes.Validate).Methods("POST") // DONE
 
 	server := router.PathPrefix("/server").Subrouter()
-	server.HandleFunc("/", routes.CreateServer).Methods("POST")
-	server.HandleFunc("/", routes.ReadServer).Methods("GET")
+	server.HandleFunc("/", routes.CreateServer).Methods("POST")     // DONE
+	server.HandleFunc("/", routes.ReadServer).Methods("GET")        // DONE
 	server.HandleFunc("/all", routes.ReadAllServers).Methods("GET") // DONE
-	server.HandleFunc("/", routes.UpdateServer).Methods("PUT")
-	server.HandleFunc("/", routes.DeleteServer).Methods("DELETE")
+	server.HandleFunc("/", routes.UpdateServer).Methods("PUT")      // DONE
+	server.HandleFunc("/", routes.DeleteServer).Methods("DELETE")   // DONE
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router

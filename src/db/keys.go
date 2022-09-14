@@ -29,7 +29,7 @@ func createKey(serverID int, publicKey string, presharedKey string) (keyID int, 
 		return
 	}
 
-	newKey := Keys{ServerID: serverID, PublicKey: publicKey, PresharedKey: presharedKey}
+	newKey := VPNKeys{ServerID: serverID, PublicKey: publicKey, PresharedKey: presharedKey}
 	keyCreation := db.Create(&newKey)
 	if keyCreation.Error != nil {
 		err = ErrCreatingKey
@@ -57,7 +57,7 @@ func CreateKeyAndLink(userID int, serverID int, publicKey string, presharedKey s
 // READ
 
 //finds a key object from a keyID
-func readKey(keyID int) (key Keys, err error) {
+func readKey(keyID int) (key VPNKeys, err error) {
 	db := DBSystem
 
 	keyQuery := db.Where("id = ?", keyID).First(&key)
@@ -84,7 +84,7 @@ func readUserKeys(userID int) (userKeys []UserKeys, err error) {
 }
 
 //gets all keys in database
-func ReadAllKeys() (keys []Keys, err error) {
+func ReadAllKeys() (keys []VPNKeys, err error) {
 	db := DBSystem
 
 	dbResult := db.Find(&keys)
@@ -92,10 +92,10 @@ func ReadAllKeys() (keys []Keys, err error) {
 	return keys, err
 }
 
-func readKeysWithServerID(serverID int) (keys []Keys, err error) {
+func readKeysWithServerID(serverID int) (keys []VPNKeys, err error) {
 	db := DBSystem
 
-	keyQuery := db.Where("serverID = ?", serverID).Find(&keys)
+	keyQuery := db.Where("server_id = ?", serverID).Find(&keys)
 	if errors.Is(keyQuery.Error, gorm.ErrRecordNotFound) {
 		err = ErrKeyNotFound
 	} else if keyQuery.Error != nil {
@@ -108,7 +108,7 @@ func readKeysWithServerID(serverID int) (keys []Keys, err error) {
 //UPDATE
 
 //updates a key object
-func updateKey(key Keys) (err error) {
+func updateKey(key VPNKeys) (err error) {
 	db := DBSystem
 
 	err = db.Save(&key).Error

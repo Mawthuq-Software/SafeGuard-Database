@@ -233,6 +233,11 @@ func DeleteServer(res http.ResponseWriter, req *http.Request) {
 	queryVars := req.URL.Query()
 
 	serverID := queryVars.Get("id")
+	if serverID == "" {
+		bodyRes.Response = "id needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
 
 	serverIDInt, serverConvErr := strconv.Atoi(serverID)
 	if serverConvErr != nil {

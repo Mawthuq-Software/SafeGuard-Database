@@ -18,7 +18,7 @@ type TokenResponse struct {
 
 type AllKeyResponse struct {
 	StandardResponse
-	Keys []db.Keys `json:"keys"`
+	Keys []db.VPNKeys `json:"keys"`
 }
 
 type UserSubscriptionResponse struct {

@@ -50,20 +50,20 @@ type Users struct {
 
 type UserKeys struct {
 	StandardModel
-	UserID int
-	Users  Users `gorm:"foreignKey:UserID"`
-	KeyID  int
-	Keys   Keys `gorm:"foreignKey:KeyID"`
+	UserID  int
+	Users   Users `gorm:"foreignKey:UserID"`
+	KeyID   int
+	VPNKeys VPNKeys `gorm:"foreignKey:KeyID"`
 }
 
-type Keys struct {
+type VPNKeys struct {
 	StandardModel
 	ServerID       int
 	Servers        Servers `gorm:"foreignKey:ServerID"`
 	UsedBandwidth  int
 	TotalBandwidth int
-	PublicKey      string
-	PresharedKey   string
+	PublicKey      string `gorm:"unique"`
+	PresharedKey   string `gorm:"unique"`
 	Enabled        bool
 }
 
@@ -80,7 +80,7 @@ type Servers struct {
 type KeyIPv4 struct {
 	StandardModel
 	KeyID       int
-	Keys        Keys `gorm:"foreignKey:KeyID"`
+	VPNKeys     VPNKeys `gorm:"foreignKey:KeyID"`
 	IPv4ID      int
 	PrivateIPv4 PrivateIPv4 `gorm:"foreignKey:IPv4ID"`
 }
@@ -93,7 +93,7 @@ type PrivateIPv4 struct {
 type KeyIPv6 struct {
 	StandardModel
 	KeyID       int
-	Keys        Keys `gorm:"foreignKey:KeyID"`
+	VPNKeys     VPNKeys `gorm:"foreignKey:KeyID"`
 	IPv6ID      int
 	PrivateIPv6 PrivateIPv6 `gorm:"foreignKey:IPv6ID"`
 }
