@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
@@ -102,7 +103,6 @@ func AddKey(res http.ResponseWriter, req *http.Request) {
 
 //Deletes a personal user key
 func DeleteKey(res http.ResponseWriter, req *http.Request) {
-	var bodyReq KeyDelete
 	bodyRes := responses.StandardResponse{}
 
 	bearerToken := req.Header.Get("Bearer")
@@ -111,16 +111,26 @@ func DeleteKey(res http.ResponseWriter, req *http.Request) {
 	_, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	queryVars := req.URL.Query()
+
+	keyID := queryVars.Get("id")
+	if keyID == "" {
+		bodyRes.Response = "id needs to be filled"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
 
-	if bodyReq.ID <= 0 {
-		bodyRes.Response = "client keyID cannot be empty"
+	keyIDInt, convErr := strconv.Atoi(keyID)
+	if convErr != nil {
+		bodyRes.Response = "id could not be converted to integer"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	err := db.DeleteKeyAndLink(bodyReq.ID)
+	err := db.DeleteKeyAndLink(keyIDInt)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
@@ -159,6 +169,54 @@ func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 	responses.Standard(res, bodyRes, http.StatusAccepted)
 }
 
+func GetKeys(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.UserKeysResponse{}
+	bearerToken := req.Header.Get("Bearer")
+	userPerms := []int{db.PERSONAL_KEYS_VIEW}
+	adminPerms := []int{db.KEYS_VIEW_ALL}
+
+	userID, userValidErr := db.ValidatePerms(bearerToken, userPerms)
+	_, adminValidErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	queryVars := req.URL.Query()
+
+	userIDQuery := queryVars.Get("userID")
+	if userIDQuery == "" {
+		bodyRes.Response = "userID needs to be filled"
+		responses.UserKeys(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	userIDQueryInt, convErr := strconv.Atoi(userIDQuery)
+	if convErr != nil {
+		bodyRes.Response = "id could not be converted to integer"
+		responses.UserKeys(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if userValidErr != nil && adminValidErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.UserKeys(res, bodyRes, http.StatusForbidden)
+		return
+	} else if userValidErr == nil {
+		if userID != userIDQueryInt {
+			bodyRes.Response = "user does not have permission or an error occurred"
+			responses.UserKeys(res, bodyRes, http.StatusForbidden)
+			return
+		}
+	}
+
+	userKeys, err := db.ReadUserKeys(userID)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.UserKeys(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.UserKeys = userKeys
+	bodyRes.Response = "got all keys successfully"
+	responses.UserKeys(res, bodyRes, http.StatusAccepted)
+}
+
 //Gets all keys from the database
 func GetAllKeys(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.AllKeyResponse{}
@@ -168,7 +226,8 @@ func GetAllKeys(res http.ResponseWriter, req *http.Request) {
 	_, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
-		responses.AllKeys(res, bodyRes, http.StatusBadRequest)
+		responses.AllKeys(res, bodyRes, http.StatusForbidden)
+		return
 	}
 
 	keys, err := db.ReadAllKeys()

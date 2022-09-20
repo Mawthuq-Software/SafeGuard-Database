@@ -33,9 +33,10 @@ func NewRouter() *mux.Router {
 
 	key := router.PathPrefix("/key").Subrouter()
 	key.HandleFunc("/", routes.AddKey).Methods("POST")                       // DONE
-	key.HandleFunc("/delete", routes.DeleteKey).Methods("POST")              // NOT DONE
-	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST") // NOT DONE
-	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("POST")            // NOT DONE
+	key.HandleFunc("/", routes.DeleteKey).Methods("DELETE")                  // DONE
+	key.HandleFunc("/", routes.GetKeys).Methods("GET")                       // DONE
+	key.HandleFunc("/get-all", routes.GetAllKeys).Methods("GET")             // DONE
+	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST") // NOT DONE NEEDS FURTHER TESTING
 
 	token := router.PathPrefix("/token").Subrouter()
 	token.HandleFunc("/validate", routes.Validate).Methods("POST") // DONE

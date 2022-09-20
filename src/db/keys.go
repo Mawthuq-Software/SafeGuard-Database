@@ -71,10 +71,10 @@ func readKey(keyID int) (key VPNKeys, err error) {
 }
 
 //finds all the user's keys from their userID
-func readUserKeys(userID int) (userKeys []UserKeys, err error) {
+func ReadUserKeys(userID int) (userKeys []UserKeys, err error) {
 	db := DBSystem
 	userKeysQuery := db.Where("user_id = ?", userID).Find(&userKeys)
-	if !errors.Is(userKeysQuery.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(userKeysQuery.Error, gorm.ErrRecordNotFound) {
 		err = ErrKeyNotFound
 		return
 	} else if userKeysQuery.Error != nil {

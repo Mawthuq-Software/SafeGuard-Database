@@ -21,6 +21,11 @@ type AllKeyResponse struct {
 	Keys []db.VPNKeys `json:"keys"`
 }
 
+type UserKeysResponse struct {
+	StandardResponse
+	UserKeys []db.UserKeys `json:"userKeys"`
+}
+
 type UserSubscriptionResponse struct {
 	StandardResponse
 	UserSubscription db.UserSubscriptions `json:"userSubscription"`
@@ -66,6 +71,13 @@ func Token(res http.ResponseWriter, resStruct TokenResponse, httpStatusCode int)
 }
 
 func AllKeys(res http.ResponseWriter, resStruct AllKeyResponse, httpStatusCode int) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(httpStatusCode)
+	jsonResp, _ := json.Marshal(resStruct)
+	res.Write(jsonResp)
+}
+
+func UserKeys(res http.ResponseWriter, resStruct UserKeysResponse, httpStatusCode int) {
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(httpStatusCode)
 	jsonResp, _ := json.Marshal(resStruct)

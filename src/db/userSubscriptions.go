@@ -111,7 +111,7 @@ func DeleteUserSubscription(userSubID int) (err error) {
 		return
 	}
 
-	_, readErr := readUserKeys(subs.UserID)
+	_, readErr := ReadUserKeys(subs.UserID)
 	if readErr != nil && readErr != ErrKeyNotFound { //check there is an error and not the error we want
 		return readErr
 	}
@@ -143,7 +143,7 @@ func checkSubscriptionKeyAddition(userID int) (err error) {
 	}
 
 	numKeys := subscription.NumberOfKeys
-	userKeys, err := readUserKeys(userID)
+	userKeys, err := ReadUserKeys(userID)
 	if err != nil && err != ErrKeyNotFound {
 		return
 	}
