@@ -142,6 +142,7 @@ type ServerConfigurations struct {
 
 type Configurations struct {
 	StandardModel
+	Name string
 	DNS  string
 	Mask int
 }

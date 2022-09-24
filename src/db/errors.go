@@ -31,7 +31,7 @@ var (
 	//GroupPolicy
 	ErrGroupPolicyNotFound = errors.New("group policies was not found")
 	//Policy
-	ErrPolicyNotFound = errors.New("policy was nto found")
+	ErrPolicyNotFound = errors.New("policy was not found")
 	//Authentication
 	ErrAuthNotFound   = errors.New("authentication was not found")
 	ErrCreatingAuth   = errors.New("error when creating new authentication")
@@ -63,6 +63,10 @@ var (
 	ErrUserKeyNotFound = errors.New("user's keys were not found")
 	ErrUserKeyLink     = errors.New("error creating user key link")
 	ErrDeletingUserKey = errors.New("error deleting user key link")
+	//Configuration
+	ErrConfMaskInvalid = errors.New("mask is invalid")
+	ErrCreatingConf    = errors.New("error occurred when creating new configuration")
+	ErrConfNotFound    = errors.New("configuration was not found")
 )
 
 // func ErrorCheck(error) error {
