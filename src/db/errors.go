@@ -65,6 +65,7 @@ var (
 	ErrDeletingUserKey = errors.New("error deleting user key link")
 	//Configuration
 	ErrConfMaskInvalid = errors.New("mask is invalid")
+	ErrConfDNSInvalid  = errors.New("DNS is invalid")
 	ErrCreatingConf    = errors.New("error occurred when creating new configuration")
 	ErrConfNotFound    = errors.New("configuration was not found")
 )

@@ -41,6 +41,18 @@ func CreateConfiguration(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	adminPerms := []int{db.CONFIGURATION_ADD}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
 	createConf := db.CreateConfiguration(bodyReq.Name, bodyReq.DNS, bodyReq.Mask)
 	if createConf != nil {
 		bodyRes.Response = createConf.Error()
@@ -66,7 +78,7 @@ func ReadConfiguration(res http.ResponseWriter, req *http.Request) {
 	// Check perms
 	bearerToken := req.Header.Get("Bearer")
 
-	adminPerms := []int{db.CONFIGURATION_ADD}
+	adminPerms := []int{db.CONFIGURATION_READ}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
 	if validAdminErr != nil {
@@ -92,4 +104,121 @@ func ReadConfiguration(res http.ResponseWriter, req *http.Request) {
 	bodyRes.Response = "successfully pulled configuration"
 	bodyRes.Configuration = conf
 	responses.Configuration(res, bodyRes, http.StatusAccepted)
+}
+
+func UpdateConfiguration(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	userPerms := []int{db.CONFIGURATION_MODIFY}
+	_, validAdminErr := db.ValidatePerms(bearerToken, userPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	queryVars := req.URL.Query()
+
+	configID := queryVars.Get("id")
+	configName := queryVars.Get("name")
+	configDNS := queryVars.Get("dns")
+	configMask := queryVars.Get("mask")
+
+	if configID == "" || configID == "0" {
+		bodyRes.Response = "id needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	convID, convErr := strconv.Atoi(configID)
+	if convErr != nil {
+		bodyRes.Response = "unable to convert id to int"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	convInt, convErr := strconv.Atoi(configMask)
+	if convErr != nil {
+		bodyRes.Response = "unable to convert the mask to an int"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	confErr := db.CheckConfig(configDNS, convInt)
+	if confErr != nil {
+		bodyRes.Response = confErr.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	conf, readErr := db.ReadConfiguration(convID)
+	if readErr != nil {
+		bodyRes.Response = readErr.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if configName != "" {
+		conf.Name = configName
+	}
+	if configDNS != "" {
+		conf.DNS = configDNS
+	}
+	if convInt != -1 {
+		conf.Mask = convInt
+	}
+
+	updateErr := db.UpdateConfiguration(conf)
+	if updateErr != nil {
+		bodyRes.Response = updateErr.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "successfully updated config"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
+}
+
+func DeleteConfiguration(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	userPerms := []int{db.CONFIGURATION_DELETE}
+	_, validAdminErr := db.ValidatePerms(bearerToken, userPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	queryVars := req.URL.Query()
+
+	configID := queryVars.Get("id")
+	if configID == "" || configID == "0" {
+		bodyRes.Response = "id needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	convID, convErr := strconv.Atoi(configID)
+	if convErr != nil {
+		bodyRes.Response = "unable to convert id to int"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	delErr := db.DeleteConfiguration(convID)
+	if delErr != nil {
+		bodyRes.Response = delErr.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+	bodyRes.Response = "successfully delete configuration"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }

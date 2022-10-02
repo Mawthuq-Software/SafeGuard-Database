@@ -8,12 +8,9 @@ import (
 
 func CreateConfiguration(name string, dns string, mask int) (err error) {
 	db := DBSystem
-	ipAddr := net.ParseIP(dns)
-	if ipAddr == nil {
-		return ErrServerIPInvalid
-	}
-	if mask > 32 {
-		return ErrConfMaskInvalid
+	confErr := CheckConfig(dns, mask)
+	if confErr != nil {
+		return confErr
 	}
 
 	conf := Configurations{Name: name, DNS: dns, Mask: mask}
@@ -57,5 +54,18 @@ func DeleteConfiguration(confID int) (err error) {
 		return deleteErr.Error
 	}
 
+	return
+}
+
+func CheckConfig(dns string, mask int) (err error) {
+	if dns != "" {
+		ipAddr := net.ParseIP(dns)
+		if ipAddr == nil {
+			return ErrConfDNSInvalid
+		}
+	}
+	if mask != -1 && mask > 32 {
+		return ErrConfMaskInvalid
+	}
 	return
 }

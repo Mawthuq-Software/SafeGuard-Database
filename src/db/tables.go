@@ -142,7 +142,7 @@ type ServerConfigurations struct {
 
 type Configurations struct {
 	StandardModel
-	Name string
+	Name string `gorm:"unique"`
 	DNS  string
 	Mask int
 }

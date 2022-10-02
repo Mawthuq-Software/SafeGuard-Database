@@ -45,6 +45,8 @@ const (
 	SERVER_MODIFY_ALL            int = 2014
 	CONFIGURATION_ADD            int = 2020
 	CONFIGURATION_MODIFY         int = 2021
+	CONFIGURATION_READ           int = 2022
+	CONFIGURATION_DELETE         int = 2023
 )
 
 func startupCreation() {
