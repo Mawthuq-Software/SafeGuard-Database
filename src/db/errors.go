@@ -68,6 +68,9 @@ var (
 	ErrConfDNSInvalid  = errors.New("DNS is invalid")
 	ErrCreatingConf    = errors.New("error occurred when creating new configuration")
 	ErrConfNotFound    = errors.New("configuration was not found")
+	//ServerConfiguration
+	ErrServerConfNotFound      = errors.New("server configuration not found")
+	ErrServerConfAlreadyExists = errors.New("server configuration already exists on server")
 )
 
 // func ErrorCheck(error) error {
