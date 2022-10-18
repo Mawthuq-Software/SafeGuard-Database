@@ -54,6 +54,12 @@ func NewRouter() *mux.Router {
 	configuration.HandleFunc("/", routes.UpdateConfiguration).Methods("PUT")
 	configuration.HandleFunc("/", routes.DeleteConfiguration).Methods("DELETE")
 
+	serverConfiguration := router.PathPrefix("/server-configuration").Subrouter()
+	serverConfiguration.HandleFunc("/", routes.CreateServerConfiguration).Methods("POST")
+	serverConfiguration.HandleFunc("/", routes.ReadServerConfiguration).Methods("GET")
+	serverConfiguration.HandleFunc("/", routes.UpdateServerConfiguration).Methods("PUT")
+	serverConfiguration.HandleFunc("/", routes.DeleteServerConfiguration).Methods("DELETE")
+
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router
 }

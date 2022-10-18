@@ -75,6 +75,12 @@ func ReadServerConfiguration(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if serverConfigID == "" {
+		bodyRes.Response = "id needs to be filled"
+		responses.ServerConfiguration(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
 	serverConfigIDInt, serverConfConvErr := strconv.Atoi(serverConfigID)
 	if serverConfConvErr != nil {
 		bodyRes.Response = "could not convert id to int"
@@ -91,6 +97,7 @@ func ReadServerConfiguration(res http.ResponseWriter, req *http.Request) {
 
 	bodyRes.Response = "successfully pulled server configurations"
 	bodyRes.ServerConfiguration = serverConfigs
+	responses.ServerConfiguration(res, bodyRes, http.StatusAccepted)
 }
 
 func UpdateServerConfiguration(res http.ResponseWriter, req *http.Request) {
@@ -103,12 +110,24 @@ func UpdateServerConfiguration(res http.ResponseWriter, req *http.Request) {
 	//check perms
 	bearerToken := req.Header.Get("Bearer")
 
-	adminPerms := []int{db.SERVER_CONFIGURATION_READ}
+	adminPerms := []int{db.SERVER_CONFIGURATION_MODIFY}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
 	if validAdminErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
 		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	if serverID == "" {
+		bodyRes.Response = "serverID needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if configID == "" {
+		bodyRes.Response = "configID needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
 
@@ -139,13 +158,66 @@ func UpdateServerConfiguration(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	// serverConfigs, serverConfErr := db.ReadServerConfig(serverConfigIDInt)
-	// if serverConfErr != nil {
-	// 	bodyRes.Response = serverConfErr.Error()
-	// 	responses.ServerConfiguration(res, bodyRes, http.StatusBadRequest)
-	// 	return
-	// }
 
-	bodyRes.Response = "successfully pulled server configurations"
-	// bodyRes.ServerConfiguration = serverConfigs
+	serverConf.ConfigID = configIDInt
+	updateErr := db.UpdateServerConfig(serverConf)
+
+	if updateErr != nil {
+		bodyRes.Response = updateErr.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	bodyRes.Response = "successfully updated server configurations"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
+}
+
+func DeleteServerConfiguration(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+	queryVars := req.URL.Query()
+
+	serverID := queryVars.Get("serverID")
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	adminPerms := []int{db.SERVER_CONFIGURATION_DELETE}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	if serverID == "" {
+		bodyRes.Response = "serverID needs to be filled"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	serverIDInt, serverConfConvErr := strconv.Atoi(serverID)
+	if serverConfConvErr != nil {
+		bodyRes.Response = "could not convert serverID to int"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	serverConf, confErr := db.ReadServerConfigFromServerID(serverIDInt)
+	if confErr != nil {
+		bodyRes.Response = "server configuration doesn't exist or an error occurred."
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	delErr := db.DeleteServerConfig(serverConf.ID)
+
+	if delErr != nil {
+		bodyRes.Response = delErr.Error()
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	bodyRes.Response = "successfully deleted server configurations"
+	responses.Standard(res, bodyRes, http.StatusAccepted)
 }

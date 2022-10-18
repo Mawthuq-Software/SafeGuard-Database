@@ -20,17 +20,17 @@ func CreateServerConfig(serverID int, configID int) (err error) {
 	}
 
 	_, serverConfErr := ReadServerConfigFromServerID(serverID)
-	if serverConfErr != ErrServerConfNotFound {
-		return serverConfErr
-	} else if serverConfErr != nil {
+	if serverConfErr == nil {
 		return ErrServerConfAlreadyExists
+	} else if serverConfErr != ErrServerConfNotFound {
+		return serverConfErr
 	}
+
 	newServerConf := ServerConfigurations{ServerID: serverID, ConfigID: configID}
 	createErr := db.Create(&newServerConf)
 	if createErr.Error != nil {
 		return createErr.Error
 	}
-
 	return
 }
 
