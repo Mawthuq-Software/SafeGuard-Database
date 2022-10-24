@@ -39,6 +39,8 @@ func NewRouter() *mux.Router {
 	key.HandleFunc("/toggle-usage", routes.EnableDisableKey).Methods("POST") // NOT DONE NEEDS FURTHER TESTING
 
 	token := router.PathPrefix("/token").Subrouter()
+	token.HandleFunc("/", routes.CreateToken).Methods("POST")
+	token.HandleFunc("/", routes.DeleteToken).Methods("DELETE")
 	token.HandleFunc("/validate", routes.Validate).Methods("POST") // DONE
 
 	server := router.PathPrefix("/server").Subrouter()
@@ -49,16 +51,16 @@ func NewRouter() *mux.Router {
 	server.HandleFunc("/", routes.DeleteServer).Methods("DELETE")   // DONE
 
 	configuration := router.PathPrefix("/configuration").Subrouter()
-	configuration.HandleFunc("/", routes.CreateConfiguration).Methods("POST")
-	configuration.HandleFunc("/", routes.ReadConfiguration).Methods("GET")
-	configuration.HandleFunc("/", routes.UpdateConfiguration).Methods("PUT")
-	configuration.HandleFunc("/", routes.DeleteConfiguration).Methods("DELETE")
+	configuration.HandleFunc("/", routes.CreateConfiguration).Methods("POST")   // DONE
+	configuration.HandleFunc("/", routes.ReadConfiguration).Methods("GET")      // DONE
+	configuration.HandleFunc("/", routes.UpdateConfiguration).Methods("PUT")    // DONE
+	configuration.HandleFunc("/", routes.DeleteConfiguration).Methods("DELETE") // DONE
 
 	serverConfiguration := router.PathPrefix("/server-configuration").Subrouter()
-	serverConfiguration.HandleFunc("/", routes.CreateServerConfiguration).Methods("POST")
-	serverConfiguration.HandleFunc("/", routes.ReadServerConfiguration).Methods("GET")
-	serverConfiguration.HandleFunc("/", routes.UpdateServerConfiguration).Methods("PUT")
-	serverConfiguration.HandleFunc("/", routes.DeleteServerConfiguration).Methods("DELETE")
+	serverConfiguration.HandleFunc("/", routes.CreateServerConfiguration).Methods("POST")   // DONE
+	serverConfiguration.HandleFunc("/", routes.ReadServerConfiguration).Methods("GET")      // DONE
+	serverConfiguration.HandleFunc("/", routes.UpdateServerConfiguration).Methods("PUT")    // DONE
+	serverConfiguration.HandleFunc("/", routes.DeleteServerConfiguration).Methods("DELETE") // DONE
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router

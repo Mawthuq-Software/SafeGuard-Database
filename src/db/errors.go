@@ -66,11 +66,15 @@ var (
 	//Configuration
 	ErrConfMaskInvalid = errors.New("mask is invalid")
 	ErrConfDNSInvalid  = errors.New("DNS is invalid")
-	ErrCreatingConf    = errors.New("error occurred when creating new configuration")
+	ErrCreatingConf    = errors.New("an error occurred when creating new configuration")
 	ErrConfNotFound    = errors.New("configuration was not found")
 	//ServerConfiguration
 	ErrServerConfNotFound      = errors.New("server configuration not found")
 	ErrServerConfAlreadyExists = errors.New("server configuration already exists on server")
+	//Token
+	ErrGeneratingToken = errors.New("an error occurred when creating a new token")
+	ErrAddingToken     = errors.New("an error occurred when adding a new token to the database")
+	ErrTokenNotFound   = errors.New("token was not found")
 )
 
 // func ErrorCheck(error) error {
