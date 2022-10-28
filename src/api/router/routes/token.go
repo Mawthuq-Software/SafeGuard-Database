@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
@@ -59,24 +60,32 @@ func CreateToken(res http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteToken(res http.ResponseWriter, req *http.Request) {
-	var bodyReq Token
 	bodyRes := responses.StandardResponse{}
 	bearerToken := req.Header.Get("Bearer")
 
-	err := ParseRequest(req, &bodyReq)
-	if err != nil {
-		combinedLogger.Error("Parsing request " + err.Error())
-		bodyRes.Response = "Error parsing request"
+	queryVars := req.URL.Query()
+
+	tokenID := queryVars.Get("id")
+
+	if tokenID == "" {
+		bodyRes.Response = "id needs to be filled"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
 
-	if bodyReq.TokenID <= 0 {
+	tokenIDInt, convErr := strconv.Atoi(tokenID)
+	if convErr != nil {
+		bodyRes.Response = "id could not be converted to integer"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	if tokenIDInt <= 0 {
 		bodyRes.Response = "tokenID must be filled"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
-	// , db.PERSONAL_KEYS_ADD
+
 	adminPerms := []int{db.TOKEN_DELETE}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
@@ -85,7 +94,7 @@ func DeleteToken(res http.ResponseWriter, req *http.Request) {
 		responses.Standard(res, bodyRes, http.StatusForbidden)
 		return
 	} else if validAdminErr == nil { //If request is from admin with perms
-		adminSubErr := db.DeleteToken(bodyReq.TokenID)
+		adminSubErr := db.DeleteToken(tokenIDInt)
 		if adminSubErr != nil {
 			bodyRes.Response = adminSubErr.Error()
 			responses.Standard(res, bodyRes, http.StatusBadRequest)
