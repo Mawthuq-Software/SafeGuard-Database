@@ -68,7 +68,12 @@ type DumpConfigurationResponse struct {
 
 type ServerConfigurationResponse struct {
 	StandardResponse
-	ServerConfiguration db.ServerConfigurations `json:"serverConfigurations"`
+	ServerConfiguration db.ServerConfigurations `json:"serverConfiguration"`
+}
+
+type DumpServerConfigurationResponse struct {
+	StandardResponse
+	ServerConfigurations []db.ServerConfigurations `json:"serverConfigurations"`
 }
 
 func Standard(res http.ResponseWriter, resStruct StandardResponse, httpStatusCode int) {
@@ -148,7 +153,21 @@ func Configuration(res http.ResponseWriter, resStruct ConfigurationResponse, htt
 	res.Write(jsonResp)
 }
 
+func DumpConfigurations(res http.ResponseWriter, resStruct DumpConfigurationResponse, httpStatusCode int) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(httpStatusCode)
+	jsonResp, _ := json.Marshal(resStruct)
+	res.Write(jsonResp)
+}
+
 func ServerConfiguration(res http.ResponseWriter, resStruct ServerConfigurationResponse, httpStatusCode int) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(httpStatusCode)
+	jsonResp, _ := json.Marshal(resStruct)
+	res.Write(jsonResp)
+}
+
+func DumpServerConfigurations(res http.ResponseWriter, resStruct DumpServerConfigurationResponse, httpStatusCode int) {
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(httpStatusCode)
 	jsonResp, _ := json.Marshal(resStruct)

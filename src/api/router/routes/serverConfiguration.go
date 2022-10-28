@@ -100,6 +100,33 @@ func ReadServerConfiguration(res http.ResponseWriter, req *http.Request) {
 	responses.ServerConfiguration(res, bodyRes, http.StatusAccepted)
 }
 
+func ReadAllServerConfiguration(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.DumpServerConfigurationResponse{}
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	adminPerms := []int{db.SERVER_CONFIGURATION_READ}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.DumpServerConfigurations(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	serverConfigs, serverConfErr := db.ReadAllServerConfigs()
+	if serverConfErr != nil {
+		bodyRes.Response = serverConfErr.Error()
+		responses.DumpServerConfigurations(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	bodyRes.Response = "successfully pulled server configurations"
+	bodyRes.ServerConfigurations = serverConfigs
+	responses.DumpServerConfigurations(res, bodyRes, http.StatusAccepted)
+}
+
 func UpdateServerConfiguration(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.StandardResponse{}
 	queryVars := req.URL.Query()

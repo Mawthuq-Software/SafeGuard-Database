@@ -69,7 +69,7 @@ var (
 	ErrCreatingConf    = errors.New("an error occurred when creating new configuration")
 	ErrConfNotFound    = errors.New("configuration was not found")
 	//ServerConfiguration
-	ErrServerConfNotFound      = errors.New("server configuration not found")
+	ErrServerConfNotFound      = errors.New("server configuration(s) not found")
 	ErrServerConfAlreadyExists = errors.New("server configuration already exists on server")
 	//Token
 	ErrGeneratingToken = errors.New("an error occurred when creating a new token")

@@ -62,6 +62,19 @@ func ReadServerConfigFromServerID(serverID int) (serverConf ServerConfigurations
 	return
 }
 
+func ReadAllServerConfigs() (serverConfigs []ServerConfigurations, err error) {
+	db := DBSystem
+	findErr := db.Find(&serverConfigs)
+	if errors.Is(findErr.Error, gorm.ErrRecordNotFound) {
+		err = ErrServerConfNotFound
+		return
+	} else if findErr.Error != nil {
+		err = ErrQuery
+		return
+	}
+	return
+}
+
 func UpdateServerConfig(serverConf ServerConfigurations) (err error) {
 	db := DBSystem
 
