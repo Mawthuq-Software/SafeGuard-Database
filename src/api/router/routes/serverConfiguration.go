@@ -95,7 +95,7 @@ func ReadServerConfiguration(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	bodyRes.Response = "successfully pulled server configurations"
+	bodyRes.Response = "successfully pulled server configuration"
 	bodyRes.ServerConfiguration = serverConfigs
 	responses.ServerConfiguration(res, bodyRes, http.StatusAccepted)
 }

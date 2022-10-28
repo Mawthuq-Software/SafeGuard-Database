@@ -106,6 +106,34 @@ func ReadConfiguration(res http.ResponseWriter, req *http.Request) {
 	responses.Configuration(res, bodyRes, http.StatusAccepted)
 }
 
+func ReadAllConfigurations(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.DumpConfigurationResponse{}
+
+	// Check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	adminPerms := []int{db.CONFIGURATION_READ, db.PERSONAL_KEYS_ADD}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.DumpConfigurations(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	// Read conf
+	conf, confErr := db.ReadAllConfigurations()
+	if confErr != nil {
+		bodyRes.Response = confErr.Error()
+		responses.DumpConfigurations(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	bodyRes.Response = "successfully pulled configurations"
+	bodyRes.Configurations = conf
+	responses.DumpConfigurations(res, bodyRes, http.StatusAccepted)
+}
+
 func UpdateConfiguration(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.StandardResponse{}
 

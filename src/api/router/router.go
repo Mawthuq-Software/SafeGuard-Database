@@ -51,10 +51,11 @@ func NewRouter() *mux.Router {
 	server.HandleFunc("/", routes.DeleteServer).Methods("DELETE")   // DONE
 
 	configuration := router.PathPrefix("/configuration").Subrouter()
-	configuration.HandleFunc("/", routes.CreateConfiguration).Methods("POST")   // DONE
-	configuration.HandleFunc("/", routes.ReadConfiguration).Methods("GET")      // DONE
-	configuration.HandleFunc("/", routes.UpdateConfiguration).Methods("PUT")    // DONE
-	configuration.HandleFunc("/", routes.DeleteConfiguration).Methods("DELETE") // DONE
+	configuration.HandleFunc("/", routes.CreateConfiguration).Methods("POST")     // DONE
+	configuration.HandleFunc("/", routes.ReadConfiguration).Methods("GET")        // DONE
+	configuration.HandleFunc("/all", routes.ReadAllConfigurations).Methods("GET") // DONE
+	configuration.HandleFunc("/", routes.UpdateConfiguration).Methods("PUT")      // DONE
+	configuration.HandleFunc("/", routes.DeleteConfiguration).Methods("DELETE")   // DONE
 
 	serverConfiguration := router.PathPrefix("/server-configuration").Subrouter()
 	serverConfiguration.HandleFunc("/", routes.CreateServerConfiguration).Methods("POST")    // DONE

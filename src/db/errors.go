@@ -67,7 +67,7 @@ var (
 	ErrConfMaskInvalid = errors.New("mask is invalid")
 	ErrConfDNSInvalid  = errors.New("DNS is invalid")
 	ErrCreatingConf    = errors.New("an error occurred when creating new configuration")
-	ErrConfNotFound    = errors.New("configuration was not found")
+	ErrConfNotFound    = errors.New("configuration(s) was not found")
 	//ServerConfiguration
 	ErrServerConfNotFound      = errors.New("server configuration(s) not found")
 	ErrServerConfAlreadyExists = errors.New("server configuration already exists on server")
