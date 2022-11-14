@@ -75,6 +75,11 @@ var (
 	ErrGeneratingToken = errors.New("an error occurred when creating a new token")
 	ErrAddingToken     = errors.New("an error occurred when adding a new token to the database")
 	ErrTokenNotFound   = errors.New("token was not found")
+	//ServerToken
+	ErrServerTokenAddingLink = errors.New("an error occurred when creating a server token link")
+	ErrServerTokenNotFound   = errors.New("server token does not exist")
+	ErrServerTokenSearch     = errors.New("an error occurred when searching for the server token")
+	ErrDeletingServerToken   = errors.New("an error occurred when deleting the server token link")
 )
 
 // func ErrorCheck(error) error {
