@@ -33,6 +33,17 @@ func ReadToken(tokenID int) (token Tokens, err error) {
 	return
 }
 
+func ReadTokenFromName(name string) (token Tokens, err error) {
+	db := DBSystem
+
+	findToken := db.Where("name = ?", name).First(&token)
+	if errors.Is(findToken.Error, gorm.ErrRecordNotFound) {
+		err = ErrTokenNotFound
+		return
+	}
+	return
+}
+
 func UpdateToken(token Tokens) (err error) {
 	db := DBSystem
 

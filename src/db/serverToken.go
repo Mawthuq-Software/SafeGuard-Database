@@ -2,15 +2,21 @@ package db
 
 import (
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
 
 func CreateServerToken(serverID int) (err error) {
 	findServer, serverErr := ReadServer(serverID)
-
 	if serverErr != nil {
 		return serverErr
+	}
+
+	_, err = ReadServerTokenFromServerID(serverID)
+	if err == ErrServerTokenNotFound {
+	} else {
+		return ErrServerTokenExists
 	}
 
 	_, err = CreateToken(findServer.Name)
@@ -18,11 +24,11 @@ func CreateServerToken(serverID int) (err error) {
 		return
 	}
 
-	token, err := ReadServerTokenFromName(findServer.Name)
-	if err != ErrServerTokenNotFound {
+	token, err := ReadTokenFromName(findServer.Name)
+	if err != ErrTokenNotFound && err != nil {
 		return
 	}
-
+	fmt.Println("NEED SERVER TOKEN")
 	err = createServerTokenLink(serverID, token.ID)
 	return
 }
@@ -35,7 +41,6 @@ func createServerTokenLink(serverID int, tokenID int) (err error) {
 	if newTokenInfo.Error != nil {
 		return ErrServerTokenAddingLink
 	}
-
 	return
 }
 
@@ -53,10 +58,10 @@ func ReadServerToken(serverTokenID int) (serverToken ServerTokens, err error) {
 	return
 }
 
-func ReadServerTokenFromName(name string) (serverToken ServerTokens, err error) {
+func ReadServerTokenFromServerID(serverID int) (serverToken ServerTokens, err error) {
 	db := DBSystem
 
-	findInfo := db.Where("name = ?", name).First(&serverToken)
+	findInfo := db.Where("server_id = ?", serverID).First(&serverToken)
 	if errors.Is(findInfo.Error, gorm.ErrRecordNotFound) {
 		err = ErrServerTokenNotFound
 		return

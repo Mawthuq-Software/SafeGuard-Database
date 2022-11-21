@@ -80,6 +80,7 @@ var (
 	ErrServerTokenNotFound   = errors.New("server token does not exist")
 	ErrServerTokenSearch     = errors.New("an error occurred when searching for the server token")
 	ErrDeletingServerToken   = errors.New("an error occurred when deleting the server token link")
+	ErrServerTokenExists     = errors.New("server already has an existing token")
 )
 
 // func ErrorCheck(error) error {

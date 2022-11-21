@@ -121,10 +121,10 @@ type ServerInterfaces struct {
 
 type ServerTokens struct {
 	StandardModel
-	ServerID int
+	ServerID int     `gorm:"unique"`
 	Servers  Servers `gorm:"foreignKey:ServerID"`
-	TokenID  int
-	Tokens   Tokens `gorm:"foreignKey:TokenID"`
+	TokenID  int     `gorm:"unique"`
+	Tokens   Tokens  `gorm:"foreignKey:TokenID"`
 }
 
 type Tokens struct {
