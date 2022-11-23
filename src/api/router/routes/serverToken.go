@@ -32,7 +32,7 @@ func CreateServerToken(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	adminPerms := []int{db.SERVER_TOKEN_ADD, db.PERSONAL_KEYS_ADD}
+	adminPerms := []int{db.SERVER_TOKEN_ADD}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
 	if validAdminErr != nil {
