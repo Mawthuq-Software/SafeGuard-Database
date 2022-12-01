@@ -107,8 +107,8 @@ type WireguardInterfaces struct {
 	StandardModel
 	ListenPort  int
 	PublicKey   string
-	IPv4Address string
-	IPv6Address string
+	IPv4Address []string
+	IPv6Address []string
 }
 
 type ServerInterfaces struct {

@@ -81,6 +81,15 @@ var (
 	ErrServerTokenSearch     = errors.New("an error occurred when searching for the server token")
 	ErrDeletingServerToken   = errors.New("an error occurred when deleting the server token link")
 	ErrServerTokenExists     = errors.New("server already has an existing token")
+	//WireguardInterface
+	ErrCreatingWireguardInterface = errors.New("an error occurred when creating a new wireguard interface")
+	ErrFindingWireguardInterface  = errors.New("an error occurred when searching for the wireguard interface")
+	ErrDeletingWireguardInterface = errors.New("an error occurred when deleting the wireguard interface")
+	//ServerInterface
+	ErrCreatingServerInterface    = errors.New("an error occurred when creating a new server interface link")
+	ErrFindingServerInterface     = errors.New("an error occurred when searching for the server interface")
+	ErrKeysExistOnServerInterface = errors.New("keys exist on the server interface, delete them first")
+	ErrDeletingServerInterface    = errors.New("an error occurred when deleting the server interface")
 )
 
 // func ErrorCheck(error) error {
