@@ -106,14 +106,14 @@ type PrivateIPv6 struct {
 type WireguardInterfaces struct {
 	StandardModel
 	ListenPort  int
-	PublicKey   string
-	IPv4Address []string
-	IPv6Address []string
+	PublicKey   string `gorm:"unique"`
+	IPv4Address string `gorm:"unique"`
+	IPv6Address string `gorm:"unique"`
 }
 
 type ServerInterfaces struct {
 	StandardModel
-	ServerID            int
+	ServerID            int     `gorm:"unique"`
 	Servers             Servers `gorm:"foreignKey:ServerID"`
 	InterfaceID         int
 	WireguardInterfaces WireguardInterfaces `gorm:"foreignKey:InterfaceID"`

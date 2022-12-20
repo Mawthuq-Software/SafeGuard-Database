@@ -7,7 +7,7 @@ import (
 )
 
 // creates a new wireguard interface
-func CreateWireguardInterface(listenPort int, publicKey string, ipv4Address []string, ipv6Address []string) (err error) {
+func createWireguardInterface(listenPort int, publicKey string, ipv4Address string, ipv6Address string) (id int, err error) {
 	db := DBSystem
 
 	newInterface := WireguardInterfaces{ListenPort: listenPort, PublicKey: publicKey, IPv4Address: ipv4Address, IPv6Address: ipv6Address}
@@ -16,10 +16,11 @@ func CreateWireguardInterface(listenPort int, publicKey string, ipv4Address []st
 	if createInterface.Error != nil {
 		err = ErrCreatingWireguardInterface
 	}
+	id = newInterface.ID
 	return
 }
 
-func ReadWireguardInterface(wireguardInterfaceID int) (wgInterface WireguardInterfaces, err error) {
+func readWireguardInterface(wireguardInterfaceID int) (wgInterface WireguardInterfaces, err error) {
 	db := DBSystem
 
 	findInterface := db.Where("id = ?", wireguardInterfaceID).First(&wgInterface)
@@ -32,10 +33,10 @@ func ReadWireguardInterface(wireguardInterfaceID int) (wgInterface WireguardInte
 	return
 }
 
-func DeleteWireguardInterface(wireguardInterfaceID int) (err error) {
+func deleteWireguardInterface(wireguardInterfaceID int) (err error) {
 	db := DBSystem
 
-	wgInterface, err := ReadWireguardInterface(wireguardInterfaceID)
+	wgInterface, err := readWireguardInterface(wireguardInterfaceID)
 	if err != nil {
 		return err
 	}

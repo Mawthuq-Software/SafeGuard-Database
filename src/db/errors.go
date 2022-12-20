@@ -90,6 +90,9 @@ var (
 	ErrFindingServerInterface     = errors.New("an error occurred when searching for the server interface")
 	ErrKeysExistOnServerInterface = errors.New("keys exist on the server interface, delete them first")
 	ErrDeletingServerInterface    = errors.New("an error occurred when deleting the server interface")
+	//IPAddress
+	ErrIPv4AddressNotValid = errors.New("the ipv4 address is not valid")
+	ErrIPv6AddressNotValid = errors.New("the ipv6 address is not valid")
 )
 
 // func ErrorCheck(error) error {
