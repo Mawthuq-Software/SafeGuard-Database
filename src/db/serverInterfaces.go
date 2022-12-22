@@ -60,6 +60,18 @@ func ReadServerInterface(serverInterfaceID int) (serverInterface ServerInterface
 	return
 }
 
+func ReadServerInterfaceFromServerID(serverID int) (serverInterface ServerInterfaces, err error) {
+	db := DBSystem
+
+	findInterface := db.Where("server_id = ?", serverID).First(&serverInterface)
+	if errors.Is(findInterface.Error, gorm.ErrRecordNotFound) {
+		err = ErrFindingServerInterface
+	} else if findInterface.Error != nil {
+		err = ErrQuery
+	}
+	return
+}
+
 func DeleteServerInterface(serverInterfaceID int) (err error) {
 	// make checks before deleting the interface
 	serverInterface, err := ReadServerInterface(serverInterfaceID)

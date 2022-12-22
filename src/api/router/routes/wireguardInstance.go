@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/api/router/responses"
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/db"
@@ -52,7 +53,7 @@ func CreateWireguardInstance(res http.ResponseWriter, req *http.Request) {
 	//check perms
 	bearerToken := req.Header.Get("Bearer")
 
-	adminPerms := []int{db.PERSONAL_KEYS_ADD}
+	adminPerms := []int{db.WIREGUARD_INSTANCE_CREATE}
 	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
 
 	if validAdminErr != nil {
@@ -72,6 +73,48 @@ func CreateWireguardInstance(res http.ResponseWriter, req *http.Request) {
 	} else {
 		bodyRes.Response = "an error occurred"
 		responses.Standard(res, bodyRes, http.StatusInternalServerError)
+		return
+	}
+}
+
+func ReadWireguardInstance(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.WireguardInterfaceResponse{}
+
+	queryVars := req.URL.Query()
+
+	wireguardInstanceID := queryVars.Get("id")
+
+	wireguardInstanceIDInt, serverConvErr := strconv.Atoi(wireguardInstanceID)
+	if serverConvErr != nil {
+		bodyRes.Response = "could not convert id to int"
+		responses.WireguardInstance(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	adminPerms := []int{db.WIREGUARD_INSTANCE_READ}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.WireguardInstance(res, bodyRes, http.StatusForbidden)
+		return
+	} else if validAdminErr == nil { //If request is from admin with perms
+		wgInterface, adminWGErr := db.ReadWireguardInstanceFromServerID(wireguardInstanceIDInt)
+		if adminWGErr != nil {
+			bodyRes.Response = adminWGErr.Error()
+			responses.WireguardInstance(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		bodyRes.Response = "read wireguard instance successfully"
+		bodyRes.WireguardInterface = wgInterface
+		responses.WireguardInstance(res, bodyRes, http.StatusAccepted)
+		return
+	} else {
+		bodyRes.Response = "an error occurred"
+		responses.WireguardInstance(res, bodyRes, http.StatusInternalServerError)
 		return
 	}
 }

@@ -70,6 +70,7 @@ func NewRouter() *mux.Router {
 
 	wgInstance := router.PathPrefix("/wireguard-instance").Subrouter()
 	wgInstance.HandleFunc("/", routes.CreateWireguardInstance).Methods("POST")
+	wgInstance.HandleFunc("/", routes.ReadWireguardInstance).Methods("GET")
 
 	router.MethodNotAllowedHandler = http.HandlerFunc(setCorsHeader) //if method is not found allow OPTIONS
 	return router
