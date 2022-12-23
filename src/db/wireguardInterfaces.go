@@ -41,7 +41,7 @@ func ReadWireguardInstanceFromServerID(serverID int) (wgInterface WireguardInter
 		return
 	}
 
-	findInterface := db.Where("id = ?", serverInterface.ID).First(&wgInterface)
+	findInterface := db.Where("id = ?", serverInterface.InterfaceID).First(&wgInterface)
 
 	if errors.Is(findInterface.Error, gorm.ErrRecordNotFound) {
 		err = ErrFindingWireguardInterface

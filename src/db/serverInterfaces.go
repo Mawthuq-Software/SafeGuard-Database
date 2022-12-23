@@ -72,9 +72,9 @@ func ReadServerInterfaceFromServerID(serverID int) (serverInterface ServerInterf
 	return
 }
 
-func DeleteServerInterface(serverInterfaceID int) (err error) {
+func DeleteServerInterface(serverID int) (err error) {
 	// make checks before deleting the interface
-	serverInterface, err := ReadServerInterface(serverInterfaceID)
+	serverInterface, err := ReadServerInterfaceFromServerID(serverID)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,12 @@ func DeleteServerInterface(serverInterfaceID int) (err error) {
 		return ErrKeysExistOnServerInterface
 	}
 
-	err = deleteServerInterfaceLink(serverInterfaceID)
+	err = deleteServerInterfaceLink(serverInterface.ID)
+	if err != nil {
+		return
+	}
+
+	err = deleteWireguardInterface(serverInterface.InterfaceID)
 	return
 }
 

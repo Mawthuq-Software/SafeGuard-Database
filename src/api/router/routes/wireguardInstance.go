@@ -118,3 +118,44 @@ func ReadWireguardInstance(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func DeleteWireguardInstance(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.StandardResponse{}
+
+	queryVars := req.URL.Query()
+
+	serverID := queryVars.Get("id")
+
+	serverIDInt, serverConvErr := strconv.Atoi(serverID)
+	if serverConvErr != nil {
+		bodyRes.Response = "could not convert id to int"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	adminPerms := []int{db.WIREGUARD_INSTANCE_DELETE}
+	_, validAdminErr := db.ValidatePerms(bearerToken, adminPerms)
+
+	if validAdminErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	} else if validAdminErr == nil { //If request is from admin with perms
+		adminWGErr := db.DeleteServerInterface(serverIDInt)
+		if adminWGErr != nil {
+			bodyRes.Response = adminWGErr.Error()
+			responses.Standard(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+		bodyRes.Response = "deleted wireguard instance successfully"
+		responses.Standard(res, bodyRes, http.StatusAccepted)
+		return
+	} else {
+		bodyRes.Response = "an error occurred"
+		responses.Standard(res, bodyRes, http.StatusInternalServerError)
+		return
+	}
+}
