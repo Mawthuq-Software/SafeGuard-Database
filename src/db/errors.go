@@ -59,6 +59,8 @@ var (
 	ErrPublicKeyIncorrectForm    = errors.New("public key is not in the correct form")
 	ErrPresharedKeyIncorrectForm = errors.New("preshared key is not in the correct form")
 	ErrKeyNotFound               = errors.New("key(s) was not found")
+	ErrTooManyKeys               = errors.New("server has reached key limit")
+	ErrUnableToFindIP            = errors.New("unable to find suitable IP for key")
 	//UserKey
 	ErrUserKeyNotFound = errors.New("user's keys were not found")
 	ErrUserKeyLink     = errors.New("error creating user key link")

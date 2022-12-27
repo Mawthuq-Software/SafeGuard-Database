@@ -13,6 +13,7 @@ type Configuration struct {
 	Name            string `json:"name"`
 	DNS             string `json:"dns"`
 	Mask            int    `json:"mask"`
+	NumberOfKeys    int    `json:"numberOfKeys"`
 }
 
 func CreateConfiguration(res http.ResponseWriter, req *http.Request) {
@@ -35,8 +36,12 @@ func CreateConfiguration(res http.ResponseWriter, req *http.Request) {
 		bodyRes.Response = "dns must be filled"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
-	} else if bodyReq.Mask < 4 {
-		bodyRes.Response = "mask must be >= 4"
+	} else if bodyReq.Mask < 16 || bodyReq.Mask > 24 {
+		bodyRes.Response = "mask must be >= 16 or <= 24"
+		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
+	} else if bodyReq.NumberOfKeys < 1 || bodyReq.NumberOfKeys > 5000 {
+		bodyRes.Response = "numberOfKeys must be > 0 and < 5000"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
 		return
 	}
@@ -53,7 +58,7 @@ func CreateConfiguration(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	createConf := db.CreateConfiguration(bodyReq.Name, bodyReq.DNS, bodyReq.Mask)
+	createConf := db.CreateConfiguration(bodyReq.Name, bodyReq.DNS, bodyReq.Mask, bodyReq.NumberOfKeys)
 	if createConf != nil {
 		bodyRes.Response = createConf.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

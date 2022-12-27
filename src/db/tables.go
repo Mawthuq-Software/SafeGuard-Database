@@ -64,6 +64,8 @@ type VPNKeys struct {
 	TotalBandwidth int
 	PublicKey      string `gorm:"unique"`
 	PresharedKey   string `gorm:"unique"`
+	PrivateIPv4    string
+	PrivateIPv6    string
 	Enabled        bool
 }
 
@@ -75,32 +77,6 @@ type Servers struct {
 	IPAddress  string `gorm:"unique"`
 	Online     bool
 	LastOnline time.Time
-}
-
-type KeyIPv4 struct {
-	StandardModel
-	KeyID       int
-	VPNKeys     VPNKeys `gorm:"foreignKey:KeyID"`
-	IPv4ID      int
-	PrivateIPv4 PrivateIPv4 `gorm:"foreignKey:IPv4ID"`
-}
-
-type PrivateIPv4 struct {
-	StandardModel
-	Address string
-}
-
-type KeyIPv6 struct {
-	StandardModel
-	KeyID       int
-	VPNKeys     VPNKeys `gorm:"foreignKey:KeyID"`
-	IPv6ID      int
-	PrivateIPv6 PrivateIPv6 `gorm:"foreignKey:IPv6ID"`
-}
-
-type PrivateIPv6 struct {
-	StandardModel
-	Address string
 }
 
 type WireguardInterfaces struct {
@@ -143,9 +119,10 @@ type ServerConfigurations struct {
 
 type Configurations struct {
 	StandardModel
-	Name string `gorm:"unique"`
-	DNS  string
-	Mask int
+	Name         string `gorm:"unique"`
+	DNS          string
+	Mask         int
+	NumberOfKeys int
 }
 
 type Subscriptions struct {

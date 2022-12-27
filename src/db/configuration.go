@@ -6,14 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateConfiguration(name string, dns string, mask int) (err error) {
+func CreateConfiguration(name string, dns string, mask int, numOfKeys int) (err error) {
 	db := DBSystem
 	confErr := CheckConfig(dns, mask)
 	if confErr != nil {
 		return confErr
 	}
 
-	conf := Configurations{Name: name, DNS: dns, Mask: mask}
+	conf := Configurations{Name: name, DNS: dns, Mask: mask, NumberOfKeys: numOfKeys}
 	createErr := db.Create(&conf)
 	if createErr.Error != nil {
 		return ErrCreatingConf
@@ -28,6 +28,16 @@ func ReadConfiguration(confID int) (conf Configurations, err error) {
 		err = ErrConfNotFound
 		return
 	}
+	return
+}
+
+func ReadConfigurationFromServerID(serverID int) (conf Configurations, err error) {
+	serverConfig, err := ReadServerConfigFromServerID(serverID)
+	if err != nil {
+		return
+	}
+
+	conf, err = ReadConfiguration(serverConfig.ConfigID)
 	return
 }
 

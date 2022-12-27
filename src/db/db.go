@@ -38,9 +38,7 @@ func DBStart() {
 	errMigrate := db.AutoMigrate(
 		&Policies{}, &Groups{}, &GroupPolicies{},
 		&Authentications{}, &UserGroups{}, &Users{},
-		&UserKeys{}, &VPNKeys{}, &Servers{},
-		&KeyIPv4{}, &PrivateIPv4{}, &KeyIPv6{},
-		&PrivateIPv6{}, &WireguardInterfaces{},
+		&UserKeys{}, &VPNKeys{}, &Servers{}, &WireguardInterfaces{},
 		&ServerInterfaces{}, &ServerTokens{}, &Tokens{},
 		&ServerConfigurations{}, &Configurations{}, &Subscriptions{},
 		&UserSubscriptions{}) //Migrate tables to sqlite

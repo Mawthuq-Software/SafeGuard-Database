@@ -2,6 +2,11 @@ package db
 
 import (
 	"errors"
+	"fmt"
+	"math/rand"
+	"net"
+	"strconv"
+	"time"
 
 	"github.com/Mawthuq-Software/Wireguard-Central-Node/src/wgmanager"
 	"gorm.io/gorm"
@@ -29,7 +34,52 @@ func createKey(serverID int, publicKey string, presharedKey string) (keyID int, 
 		return
 	}
 
-	newKey := VPNKeys{ServerID: serverID, PublicKey: publicKey, PresharedKey: presharedKey}
+	//get server config
+	configuration, err := ReadConfigurationFromServerID(serverID)
+	if err != nil {
+		return
+	}
+
+	//check keys on server
+	currKeys, err := readKeysWithServerID(serverID)
+	if err != nil {
+		return
+	}
+
+	if len(currKeys) >= configuration.NumberOfKeys {
+		err = ErrTooManyKeys
+		return
+	}
+
+	octetsValid := false
+
+	//generate main public subnet IP
+	const CONFIGURATION_IP string = "10.0.0.1"
+	confMask := configuration.Mask
+	fullIP := CONFIGURATION_IP + "/" + strconv.Itoa(confMask)
+
+	rand.Seed(time.Now().UnixNano())
+	suitableIPs, err := Hosts(fullIP)
+	var newIP string
+
+	for i := 0; i < 10; i++ {
+		index := rand.Intn(len(suitableIPs) - 1)
+		newIP = suitableIPs[index]
+		fmt.Println(index)
+		_, err := readKeyFromServerIDAndIP(serverID, newIP)
+		fmt.Println(err)
+		if err == ErrKeyNotFound {
+			octetsValid = true
+			break
+		}
+	}
+
+	if !octetsValid {
+		err = ErrUnableToFindIP
+		return
+	}
+
+	newKey := VPNKeys{ServerID: serverID, PublicKey: publicKey, PresharedKey: presharedKey, PrivateIPv4: newIP, PrivateIPv6: "0"}
 	keyCreation := db.Create(&newKey)
 	if keyCreation.Error != nil {
 		err = ErrCreatingKey
@@ -105,6 +155,20 @@ func readKeysWithServerID(serverID int) (keys []VPNKeys, err error) {
 	return
 }
 
+func readKeyFromServerIDAndIP(serverID int, ipv4Address string) (key VPNKeys, err error) {
+	db := DBSystem
+
+	keyQuery := db.Where("server_id = ? AND private_ipv4 = ?", serverID, ipv4Address).First(&key)
+	if errors.Is(keyQuery.Error, gorm.ErrRecordNotFound) {
+		err = ErrKeyNotFound
+	} else if keyQuery.Error != nil {
+		combinedLogger.Error("Finding key " + keyQuery.Error.Error())
+		err = ErrQuery
+	}
+	fmt.Println(key)
+	return
+}
+
 //UPDATE
 
 //updates a key object
@@ -164,4 +228,53 @@ func checkKeyValidity(key string) (err error) {
 		err = ErrPublicKeyIncorrectForm
 	}
 	return
+}
+
+func checkIPInRangeValidty(mainIP string, ipToCheck string) (ipContained bool, err error) {
+	_, mainIPSubnet, err := net.ParseCIDR(mainIP)
+	if err != nil {
+		return
+	}
+	ipToCheckParsed, _, err := net.ParseCIDR(ipToCheck)
+	if err != nil {
+		return
+	}
+	if mainIPSubnet.Contains(ipToCheckParsed) {
+		ipContained = true
+	} else {
+		ipContained = false
+	}
+	return
+}
+
+//https://go.dev/play/p/fe-F2k6prlA
+func Hosts(cidr string) ([]string, error) {
+	ip, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return nil, err
+	}
+
+	var ips []string
+	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
+		ips = append(ips, ip.String())
+	}
+
+	// remove network address and broadcast address
+	lenIPs := len(ips)
+	switch {
+	case lenIPs < 2:
+		return ips, nil
+
+	default:
+		return ips[1 : len(ips)-1], nil
+	}
+}
+
+func inc(ip net.IP) {
+	for j := len(ip) - 1; j >= 0; j-- {
+		ip[j]++
+		if ip[j] > 0 {
+			break
+		}
+	}
 }
