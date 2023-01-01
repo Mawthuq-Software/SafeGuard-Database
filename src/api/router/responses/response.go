@@ -81,6 +81,13 @@ type WireguardInterfaceResponse struct {
 	WireguardInterface db.WireguardInterfaces `json:"wireguardInterface"`
 }
 
+type ServerDetailsResponse struct {
+	StandardResponse
+	WireguardInterface db.WireguardInterfaces `json:"wireguardInterface"`
+	Keys               []db.VPNKeys           `json:"keys"`
+	Configuration      db.Configurations      `json:"configuration"`
+}
+
 func Standard(res http.ResponseWriter, resStruct StandardResponse, httpStatusCode int) {
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(httpStatusCode)
@@ -180,6 +187,13 @@ func DumpServerConfigurations(res http.ResponseWriter, resStruct DumpServerConfi
 }
 
 func WireguardInstance(res http.ResponseWriter, resStruct WireguardInterfaceResponse, httpStatusCode int) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(httpStatusCode)
+	jsonResp, _ := json.Marshal(resStruct)
+	res.Write(jsonResp)
+}
+
+func ServerDetails(res http.ResponseWriter, resStruct ServerDetailsResponse, httpStatusCode int) {
 	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(httpStatusCode)
 	jsonResp, _ := json.Marshal(resStruct)

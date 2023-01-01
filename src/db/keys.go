@@ -41,7 +41,7 @@ func createKey(serverID int, publicKey string, presharedKey string) (keyID int, 
 	}
 
 	//check keys on server
-	currKeys, err := readKeysWithServerID(serverID)
+	currKeys, err := ReadKeysWithServerID(serverID)
 	if err != nil {
 		return
 	}
@@ -142,7 +142,8 @@ func ReadAllKeys() (keys []VPNKeys, err error) {
 	return keys, err
 }
 
-func readKeysWithServerID(serverID int) (keys []VPNKeys, err error) {
+//reads keys tied to a server
+func ReadKeysWithServerID(serverID int) (keys []VPNKeys, err error) {
 	db := DBSystem
 
 	keyQuery := db.Where("server_id = ?", serverID).Find(&keys)

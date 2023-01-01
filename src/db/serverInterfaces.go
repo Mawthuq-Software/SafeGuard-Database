@@ -79,7 +79,7 @@ func DeleteServerInterface(serverID int) (err error) {
 		return err
 	}
 
-	keys, err := readKeysWithServerID(serverInterface.ID)
+	keys, err := ReadKeysWithServerID(serverInterface.ID)
 	if err != nil {
 		return err
 	}

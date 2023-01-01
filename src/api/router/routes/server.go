@@ -150,6 +150,89 @@ func ReadAllServers(res http.ResponseWriter, req *http.Request) {
 	responses.DumpServers(res, bodyRes, http.StatusAccepted)
 }
 
+func ReadServerDetails(res http.ResponseWriter, req *http.Request) {
+	bodyRes := responses.ServerDetailsResponse{}
+	queryVars := req.URL.Query()
+
+	serverID := queryVars.Get("id")
+	serverName := queryVars.Get("name")
+
+	if serverID == "" && serverName == "" {
+		bodyRes.Response = "id or name needs to be filled"
+		responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	//check perms
+	bearerToken := req.Header.Get("Bearer")
+
+	userPerms := []int{db.PERSONAL_KEYS_ADD}
+	_, validUserErr := db.ValidatePerms(bearerToken, userPerms)
+
+	if validUserErr != nil {
+		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.ServerDetails(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	var serverInfo db.Servers
+
+	if serverID != "" {
+		serverIDInt, convErr := strconv.Atoi(serverID)
+		if convErr != nil {
+			bodyRes.Response = "could not convert id into int"
+			responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+
+		server, serverErr := db.ReadServer(serverIDInt)
+		if serverErr != nil {
+			bodyRes.Response = serverErr.Error()
+			responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+
+		serverInfo = server
+
+	} else if serverName != "" {
+		server, serverErr := db.ReadServerFromServerName(serverName)
+		if serverErr != nil {
+			bodyRes.Response = serverErr.Error()
+			responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+			return
+		}
+
+		serverInfo = server
+	}
+
+	configuration, err := db.ReadConfigurationFromServerID(serverInfo.ID)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	wgInterface, err := db.ReadWireguardInstanceFromServerID(serverInfo.ID)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	userKeys, err := db.ReadKeysWithServerID(serverInfo.ID)
+	if err != nil {
+		bodyRes.Response = err.Error()
+		responses.ServerDetails(res, bodyRes, http.StatusBadRequest)
+		return
+	}
+
+	bodyRes.Response = "pulled server information successfully"
+	bodyRes.Configuration = configuration
+	bodyRes.Keys = userKeys
+	bodyRes.WireguardInterface = wgInterface
+	responses.ServerDetails(res, bodyRes, http.StatusAccepted)
+}
+
 func UpdateServer(res http.ResponseWriter, req *http.Request) {
 	bodyRes := responses.StandardResponse{}
 

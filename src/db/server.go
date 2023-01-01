@@ -90,7 +90,7 @@ func DeleteServer(serverID int) (err error) {
 		return readErr
 	}
 
-	keys, err := readKeysWithServerID(serverID)
+	keys, err := ReadKeysWithServerID(serverID)
 	if err != nil && err != ErrKeyNotFound {
 		return err
 	} else if len(keys) > 0 {

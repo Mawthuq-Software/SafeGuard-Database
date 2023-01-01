@@ -49,6 +49,7 @@ func NewRouter() *mux.Router {
 	server.HandleFunc("/all", routes.ReadAllServers).Methods("GET") // DONE
 	server.HandleFunc("/", routes.UpdateServer).Methods("PUT")      // DONE
 	server.HandleFunc("/", routes.DeleteServer).Methods("DELETE")   // DONE
+	server.HandleFunc("/info", routes.ReadServerDetails).Methods("GET")
 
 	serverToken := server.PathPrefix("/token").Subrouter()
 	serverToken.HandleFunc("/", routes.CreateServerToken).Methods("POST")
