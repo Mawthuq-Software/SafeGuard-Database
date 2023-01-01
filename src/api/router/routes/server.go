@@ -166,7 +166,7 @@ func ReadServerDetails(res http.ResponseWriter, req *http.Request) {
 	//check perms
 	bearerToken := req.Header.Get("Bearer")
 
-	userPerms := []int{db.PERSONAL_KEYS_ADD}
+	userPerms := []int{db.SERVER_READ_ALL}
 	_, validUserErr := db.ValidatePerms(bearerToken, userPerms)
 
 	if validUserErr != nil {

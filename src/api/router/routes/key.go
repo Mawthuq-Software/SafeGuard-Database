@@ -150,7 +150,16 @@ func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 	_, validErr := db.ValidatePerms(bearerToken, perms)
 	if validErr != nil {
 		bodyRes.Response = "user does not have permission or an error occurred"
+		responses.Standard(res, bodyRes, http.StatusForbidden)
+		return
+	}
+
+	err := ParseRequest(req, &bodyReq)
+	if err != nil {
+		combinedLogger.Error("Parsing request " + err.Error())
+		bodyRes.Response = "Error parsing request"
 		responses.Standard(res, bodyRes, http.StatusBadRequest)
+		return
 	}
 
 	if bodyReq.ID <= 0 {
@@ -159,7 +168,7 @@ func EnableDisableKey(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := db.ToggleKey(bodyReq.ID)
+	err = db.ToggleKey(bodyReq.ID)
 	if err != nil {
 		bodyRes.Response = err.Error()
 		responses.Standard(res, bodyRes, http.StatusBadRequest)

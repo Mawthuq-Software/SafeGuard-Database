@@ -43,6 +43,7 @@ const (
 	USER_SUBSCRIPTION_VIEW_ALL   int = 2010
 	SERVER_ADD_ALL               int = 2013
 	SERVER_MODIFY_ALL            int = 2014
+	SERVER_READ_ALL              int = 2015
 	CONFIGURATION_ADD            int = 2020
 	CONFIGURATION_MODIFY         int = 2021
 	CONFIGURATION_READ           int = 2022
