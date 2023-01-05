@@ -70,28 +70,47 @@ func startupCreation() {
 
 	standardVPNPerms := []int{PERSONAL_KEYS_VIEW, PERSONAL_KEYS_ADD, PERSONAL_PASSWORD_RESET, PERSONAL_LOGIN, PERSONAL_USER_SUBSCRIPTION_VIEW,
 		PERSONAL_USER_SUBSCRIPTION_ADD, PERSONAL_USER_SUBSCRIPTION_DELETE, PERSONAL_USER_SUBSCRIPTION_MODIFY, PERSONAL_SUBSCRIPTION_VIEW, SERVER_VIEW}
-	CreatePolicy("STANDARD_USER_VPN", standardVPNPerms)
+	policyErr := CreatePolicy("STANDARD_USER_VPN", standardVPNPerms)
+	if policyErr != nil {
+		UpdatePolicy("STANDARD_USER_VPN", standardVPNPerms)
+	}
 
 	userSettingPerms := []int{PERSONAL_PASSWORD_RESET, PERSONAL_LOGIN}
-	CreatePolicy("STANDARD_USER_SETTINGS", userSettingPerms)
+	policyErr = CreatePolicy("STANDARD_USER_SETTINGS", userSettingPerms)
+	if policyErr != nil {
+		UpdatePolicy("STANDARD_USER_VPN", standardVPNPerms)
+	}
 
 	advancedUserVPNPerms := []int{PERSONAL_KEYS_MODIFY, PERSONAL_KEYS_DELETE}
-	CreatePolicy("ADVANCED_USER_VPN", advancedUserVPNPerms)
+	policyErr = CreatePolicy("ADVANCED_USER_VPN", advancedUserVPNPerms)
+	if policyErr != nil {
+		UpdatePolicy("STANDARD_USER_VPN", standardVPNPerms)
+	}
 
 	adminPerms := []int{KEYS_VIEW_ALL, KEYS_ADD_ALL, KEYS_ADD_OVERRIDE, KEYS_DELETE_ALL, KEYS_MODIFY_ALL, PASSWORD_RESET_ALL, SUBSCRIPTION_MODIFY_ALL,
 		SUBSCRIPTION_VIEW_ALL, USER_SUBSCRIPTION_MODIFY_ALL, USER_SUBSCRIPTION_VIEW_ALL, SERVER_ADD_ALL, SERVER_MODIFY_ALL, CONFIGURATION_ADD,
 		CONFIGURATION_MODIFY, CONFIGURATION_READ, CONFIGURATION_DELETE, SERVER_CONFIGURATION_ADD, SERVER_CONFIGURATION_MODIFY, SERVER_CONFIGURATION_READ,
 		SERVER_CONFIGURATION_DELETE, TOKEN_ADD, TOKEN_READ, TOKEN_MODIFY, TOKEN_DELETE, SERVER_TOKEN_ADD, SERVER_TOKEN_READ, SERVER_TOKEN_MODIFY,
 		SERVER_TOKEN_DELETE, WIREGUARD_INSTANCE_CREATE, WIREGUARD_INSTANCE_READ, WIREGUARD_INSTANCE_MODIFY, WIREGUARD_INSTANCE_DELETE}
-	CreatePolicy("ADMIN_USER", adminPerms)
+
+	policyErr = CreatePolicy("ADMIN_USER", adminPerms)
+	if policyErr != nil {
+		UpdatePolicy("STANDARD_USER_VPN", standardVPNPerms)
+	}
 
 	CreateGroup("User")
 	userPolicies := []string{"STANDARD_USER_VPN", "STANDARD_USER_SETTINGS"}
-	CreateGroupPolicies("User", userPolicies)
+	groupPolicyErr := CreateGroupPolicies("User", userPolicies)
+	if groupPolicyErr != nil {
+		UpdateGroupPolicies("User", userPolicies)
+	}
 
 	CreateGroup("Admin")
 	adminPolicies := []string{"STANDARD_USER_VPN", "STANDARD_USER_SETTINGS", "ADVANCED_USER_VPN", "ADMIN_USER"}
-	CreateGroupPolicies("Admin", adminPolicies)
+	groupPolicyErr = CreateGroupPolicies("Admin", adminPolicies)
+	if groupPolicyErr != nil {
+		UpdateGroupPolicies("User", userPolicies)
+	}
 }
 
 func CheckPermission(userID int, permID int) (bool, error) {

@@ -50,3 +50,32 @@ func ReadGroupPolicies(groupID int) ([]GroupPolicies, error) {
 	}
 	return findGroupPol, nil
 }
+
+// UPDATE
+func UpdateGroupPolicies(groupName string, policyNames []string) error {
+	db := DBSystem
+	var findGroup Groups
+
+	resFindGroup := db.Where("name = ?", groupName).First(&findGroup)
+	if resFindGroup.Error != nil {
+		combinedLogger.Warn("Finding group " + resFindGroup.Error.Error())
+		return resFindGroup.Error
+	}
+
+	for i := 0; i < len(policyNames); i++ {
+		var findPolicy Policies
+		resFindPol := db.Where("name = ?", policyNames[i]).First(&findPolicy)
+		if resFindPol.Error != nil {
+			combinedLogger.Warn("Finding policy " + groupName + "to db" + resFindPol.Error.Error())
+			return resFindPol.Error
+		}
+
+		groupPolicy := GroupPolicies{GroupID: findGroup.ID, PolicyID: findPolicy.ID}
+		updateGroupPolicy := db.Save(&groupPolicy)
+		if updateGroupPolicy.Error != nil {
+			combinedLogger.Error("Updating group " + groupName + " policy " + policyNames[i] + "to db" + resFindPol.Error.Error())
+			return updateGroupPolicy.Error
+		}
+	}
+	return nil
+}
