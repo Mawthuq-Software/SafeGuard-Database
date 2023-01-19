@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/gorilla/mux v1.8.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.13.0
 	golang.org/x/crypto v0.1.0
 	gorm.io/driver/mysql v1.4.3
@@ -11,18 +12,9 @@ require (
 )
 
 require (
-	github.com/google/go-cmp v0.5.8 // indirect
-	github.com/josharian/native v1.0.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
-	github.com/mdlayher/genetlink v1.2.0 // indirect
-	github.com/mdlayher/netlink v1.6.0 // indirect
-	github.com/mdlayher/socket v0.2.3 // indirect
-	github.com/rogpeppe/go-internal v1.9.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.zx2c4.com/wireguard v0.0.0-20220407013110-ef5c587f782d // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 

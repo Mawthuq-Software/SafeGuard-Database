@@ -12,7 +12,7 @@ import (
 var DBSystem *gorm.DB
 var combinedLogger = logger.GetCombinedLogger()
 
-func DBStart() {
+func DBStart(autoMigrate bool) {
 	combinedLogger.Info("Database connection starting")
 
 	errCreateDir := os.MkdirAll("/opt/wgManagerAuth/db", 0755) //create dir if not exist
@@ -34,18 +34,20 @@ func DBStart() {
 
 	DBSystem = db //set global variable up
 
-	// Migrate the schema
-	errMigrate := db.AutoMigrate(
-		&Policies{}, &Groups{}, &GroupPolicies{},
-		&Authentications{}, &UserGroups{}, &Users{},
-		&UserKeys{}, &VPNKeys{}, &Servers{}, &WireguardInterfaces{},
-		&ServerInterfaces{}, &ServerTokens{}, &Tokens{},
-		&ServerConfigurations{}, &Configurations{}, &Subscriptions{},
-		&UserSubscriptions{}) //Migrate tables to sqlite
-	if errMigrate != nil {
-		combinedLogger.Fatal("Migrating database " + errMigrate.Error())
-	} else {
-		combinedLogger.Info("Successfully migrated db")
+	if autoMigrate {
+		// Migrate the schema
+		errMigrate := db.AutoMigrate(
+			&Policies{}, &Groups{}, &GroupPolicies{},
+			&Authentications{}, &UserGroups{}, &Users{},
+			&UserKeys{}, &VPNKeys{}, &Servers{}, &WireguardInterfaces{},
+			&ServerInterfaces{}, &ServerTokens{}, &Tokens{},
+			&ServerConfigurations{}, &Configurations{}, &Subscriptions{},
+			&UserSubscriptions{}) //Migrate tables to sqlite
+		if errMigrate != nil {
+			combinedLogger.Fatal("Migrating database " + errMigrate.Error())
+		} else {
+			combinedLogger.Info("Successfully migrated db")
+		}
+		startupCreation()
 	}
-	startupCreation()
 }
