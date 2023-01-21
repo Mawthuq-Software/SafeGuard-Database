@@ -95,9 +95,7 @@ var userReadCmd = &cobra.Command{
 			combinedLogger.Sugar().Infoln(`Public Key:`, key.PublicKey)
 			combinedLogger.Sugar().Infoln(`Used Bandwidth:`, key.UsedBandwidth)
 			combinedLogger.Sugar().Infoln(`Total Bandwidth:`, key.TotalBandwidth, "\n")
-
 		}
-
 	},
 }
 

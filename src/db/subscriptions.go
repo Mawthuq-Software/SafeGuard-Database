@@ -68,7 +68,7 @@ func ReadAllSubscriptions() (subscriptions []Subscriptions, err error) {
 
 // UPDATE
 
-//Updates a subscription. Use -1 for numKeys or totalBandwidth to keep current value.
+//Updates a subscription.
 func UpdateSubscription(subs Subscriptions) (err error) {
 	db := DBSystem
 
