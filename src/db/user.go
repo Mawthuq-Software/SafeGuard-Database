@@ -85,6 +85,62 @@ func FindUserFromUsername(username string) (user Users, err error) {
 	return
 }
 
+// DELETE
+func DeleteUser(userID int) (err error) {
+	db := DBSystem
+
+	user, err := ReadUser(userID)
+	if err != nil {
+		return err
+	}
+
+	userKeys, err := ReadUserKeys(userID)
+	if err != ErrKeyNotFound && err != nil {
+		return err
+	}
+
+	auth, err := FindAuthFromUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	userGroups, err := ReadAllUserGroups(userID)
+	if err != nil {
+		return err
+	}
+
+	combinedLogger.Info("Deleting user's groups")
+	for i := 0; i < len(userGroups); i++ {
+		err := DeleteUserGroup(userGroups[i].ID)
+		if err != nil {
+			combinedLogger.Warn("Error deleting user group: " + err.Error())
+		}
+	}
+
+	combinedLogger.Info("Deleting user's keys")
+	for i := 0; i < len(userKeys); i++ {
+		err := DeleteKey(userKeys[i].KeyID)
+		if err != nil {
+			combinedLogger.Warn("Error deleting user key: " + err.Error())
+		}
+	}
+
+	combinedLogger.Info("Deleting user")
+	deleteUser := db.Delete(&user)
+	if deleteUser.Error != nil {
+		combinedLogger.Warn("Error deleting user: " + deleteUser.Error.Error())
+		err = deleteUser.Error
+	}
+
+	combinedLogger.Info("Deleting user authorisation field")
+	deleteAuth := db.Delete(&auth)
+	if deleteAuth.Error != nil {
+		combinedLogger.Warn("Error deleting user authorisation: " + deleteAuth.Error.Error())
+		err = deleteAuth.Error
+	}
+	return
+}
+
 // MISC
 
 // Changes the users password

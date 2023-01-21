@@ -16,7 +16,7 @@ func createUserKeyLink(userID int, keyID int) (userKeyID int, err error) {
 	if err != nil {
 		return
 	}
-	_, err = readKey(keyID)
+	_, err = ReadKey(keyID)
 	if err != nil {
 		return
 	}

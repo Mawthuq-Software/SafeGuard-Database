@@ -107,7 +107,7 @@ func CreateKeyAndLink(userID int, serverID int, publicKey string, presharedKey s
 // READ
 
 //finds a key object from a keyID
-func readKey(keyID int) (key VPNKeys, err error) {
+func ReadKey(keyID int) (key VPNKeys, err error) {
 	db := DBSystem
 
 	keyQuery := db.Where("id = ?", keyID).First(&key)
@@ -186,7 +186,7 @@ func updateKey(key VPNKeys) (err error) {
 func DeleteKey(keyID int) (err error) {
 	db := DBSystem
 
-	keyQuery, err := readKey(keyID)
+	keyQuery, err := ReadKey(keyID)
 	if err != nil {
 		return
 	}
@@ -212,7 +212,7 @@ func DeleteKeyAndLink(keyID int) (err error) {
 
 //Toggles a key usability from true to false and viceversa
 func ToggleKey(keyID int) (err error) {
-	key, err := readKey(keyID)
+	key, err := ReadKey(keyID)
 	if err != nil {
 		return
 	}
