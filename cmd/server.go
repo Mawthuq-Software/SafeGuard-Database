@@ -96,9 +96,8 @@ var serverReadCmd = &cobra.Command{
 }
 
 var serverReadNameCmd = &cobra.Command{
-	Use:     "read name SERVER_NAME",
-	Aliases: []string{"r"},
-
+	Use:     "name SERVER_NAME",
+	Aliases: []string{"n"},
 	Short:   "A command to read a server using the name.",
 	Long:    `This command allows you to read a server using the server name.`,
 	Example: `server read name Server1`,
@@ -216,7 +215,7 @@ func init() {
 	serverCmd.AddCommand(serverAddCmd)
 
 	serverCmd.AddCommand(serverReadCmd)
-	serverCmd.AddCommand(serverReadNameCmd)
+	serverReadCmd.AddCommand(serverReadNameCmd)
 
 	serverCmd.AddCommand(serverUpdateCmd)
 	serverUpdateCmd.Flags().StringP("name", "n", "", `The name of the server to be updated`)
@@ -225,6 +224,8 @@ func init() {
 	serverUpdateCmd.Flags().StringP("ip_address", "i", "", `The ip address of the server to be updated`)
 
 	serverCmd.AddCommand(serverDeleteCmd)
+
+	serverCmd.AddCommand(tokenCmd)
 
 	// Here you will define your flags and configuration settings.
 

@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -28,7 +27,7 @@ func CreateServerToken(serverID int) (err error) {
 	if err != ErrTokenNotFound && err != nil {
 		return
 	}
-	fmt.Println("NEED SERVER TOKEN")
+
 	err = createServerTokenLink(serverID, token.ID)
 	return
 }
