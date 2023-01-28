@@ -13,22 +13,21 @@ func CreateServerToken(serverID int) (err error) {
 	}
 
 	_, err = ReadServerTokenFromServerID(serverID)
-	if err == ErrServerTokenNotFound {
-	} else {
+	if err != ErrServerTokenNotFound {
 		return ErrServerTokenExists
 	}
 
-	_, err = CreateToken(findServer.Name)
+	_, tokenID, err := CreateToken(findServer.Name)
 	if err != nil {
 		return
 	}
 
-	token, err := ReadTokenFromName(findServer.Name)
-	if err != ErrTokenNotFound && err != nil {
+	token, err := ReadTokensFromName(findServer.Name)
+	if (err != ErrTokenNotFound || len(token) > 0) && err != nil {
 		return
 	}
 
-	err = createServerTokenLink(serverID, token.ID)
+	err = createServerTokenLink(serverID, tokenID)
 	return
 }
 

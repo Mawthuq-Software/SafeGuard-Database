@@ -42,7 +42,7 @@ func CreateToken(res http.ResponseWriter, req *http.Request) {
 		responses.Token(res, bodyRes, http.StatusForbidden)
 		return
 	} else if validAdminErr == nil { //If request is from admin with perms
-		uuid, adminSubErr := db.CreateToken(bodyReq.Name)
+		uuid, _, adminSubErr := db.CreateToken(bodyReq.Name)
 		if adminSubErr != nil {
 			bodyRes.Response = adminSubErr.Error()
 			responses.Token(res, bodyRes, http.StatusBadRequest)

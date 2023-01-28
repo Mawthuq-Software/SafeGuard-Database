@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateToken(name string) (uuid string, err error) {
+func CreateToken(name string) (uuid string, tokenID int, err error) {
 	db := DBSystem
 
 	newUUIDStr, hashedUUID, err := generateToken()
@@ -18,8 +18,7 @@ func CreateToken(name string) (uuid string, err error) {
 		err = ErrAddingToken
 		return
 	}
-
-	return newUUIDStr, err
+	return newUUIDStr, newToken.ID, err
 }
 
 func ReadToken(tokenID int) (token Tokens, err error) {
@@ -33,10 +32,10 @@ func ReadToken(tokenID int) (token Tokens, err error) {
 	return
 }
 
-func ReadTokenFromName(name string) (token Tokens, err error) {
+func ReadTokensFromName(name string) (token []Tokens, err error) {
 	db := DBSystem
 
-	findToken := db.Where("name = ?", name).First(&token)
+	findToken := db.Where("name = ?", name).Find(&token)
 	if errors.Is(findToken.Error, gorm.ErrRecordNotFound) {
 		err = ErrTokenNotFound
 		return
