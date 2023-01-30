@@ -6,7 +6,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"strconv"
 
@@ -85,13 +84,13 @@ var serverReadCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("SERVER INFO")
-		fmt.Println("ServerID: ", server.ID)
-		fmt.Println("Server Name: " + server.Name)
-		fmt.Println("Server Region: " + server.Region)
-		fmt.Println("Server Country: " + server.Country)
-		fmt.Println("Server IP Address: " + server.IPAddress)
-		fmt.Println("Server Last Online: ", server.LastOnline)
+		combinedLogger.Sugar().Infoln("SERVER INFO")
+		combinedLogger.Sugar().Infoln("ServerID: ", server.ID)
+		combinedLogger.Sugar().Infoln("Server Name: " + server.Name)
+		combinedLogger.Sugar().Infoln("Server Region: " + server.Region)
+		combinedLogger.Sugar().Infoln("Server Country: " + server.Country)
+		combinedLogger.Sugar().Infoln("Server IP Address: " + server.IPAddress)
+		combinedLogger.Sugar().Infoln("Server Last Online: ", server.LastOnline)
 	},
 }
 
@@ -118,13 +117,41 @@ var serverReadNameCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("SERVER INFO")
-		fmt.Println("ServerID: ", server.ID)
-		fmt.Println("Server Name: " + server.Name)
-		fmt.Println("Server Region: " + server.Region)
-		fmt.Println("Server Country: " + server.Country)
-		fmt.Println("Server IP Address: " + server.IPAddress)
-		fmt.Println("Server Last Online: ", server.LastOnline)
+		combinedLogger.Sugar().Infoln("SERVER INFO")
+		combinedLogger.Sugar().Infoln("ServerID: ", server.ID)
+		combinedLogger.Sugar().Infoln("Server Name: " + server.Name)
+		combinedLogger.Sugar().Infoln("Server Region: " + server.Region)
+		combinedLogger.Sugar().Infoln("Server Country: " + server.Country)
+		combinedLogger.Sugar().Infoln("Server IP Address: " + server.IPAddress)
+		combinedLogger.Sugar().Infoln("Server Last Online: ", server.LastOnline)
+	},
+}
+
+var serverReadAllCmd = &cobra.Command{
+	Use:     "all",
+	Aliases: []string{"a"},
+	Short:   "A command to read all servers.",
+	Long:    `This command allows you to read a server using the server name.`,
+	Example: `server read all`,
+	Run: func(cmd *cobra.Command, args []string) {
+		db.DBStart(false)
+
+		servers, err := db.ReadAllServers()
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading servers: " + err.Error())
+			return
+		}
+		combinedLogger.Sugar().Infoln("SERVER INFO")
+
+		for i := 0; i < len(servers); i++ {
+			server := servers[i]
+			combinedLogger.Sugar().Infoln("ServerID: ", server.ID)
+			combinedLogger.Sugar().Infoln("Server Name: " + server.Name)
+			combinedLogger.Sugar().Infoln("Server Region: " + server.Region)
+			combinedLogger.Sugar().Infoln("Server Country: " + server.Country)
+			combinedLogger.Sugar().Infoln("Server IP Address: " + server.IPAddress)
+			combinedLogger.Sugar().Infoln("Server Last Online: ", server.LastOnline, "\n")
+		}
 	},
 }
 
@@ -216,6 +243,7 @@ func init() {
 
 	serverCmd.AddCommand(serverReadCmd)
 	serverReadCmd.AddCommand(serverReadNameCmd)
+	serverReadCmd.AddCommand(serverReadAllCmd)
 
 	serverCmd.AddCommand(serverUpdateCmd)
 	serverUpdateCmd.Flags().StringP("name", "n", "", `The name of the server to be updated`)
