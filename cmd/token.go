@@ -50,33 +50,39 @@ var tokenAddCmd = &cobra.Command{
 }
 
 var tokenReadCmd = &cobra.Command{
-	Use:     "read TOKEN_ID",
+	Use:     "read SERVER_ID",
 	Aliases: []string{"r"},
 	Short:   "A command to read server tokens.",
-	Long:    `This command allows you to read server tokens in the database by id.`,
+	Long:    `This command allows you to read server tokens in the database by server id.`,
 	Example: `server token read 1`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New(`"server token read" requires at least 1 argument`)
 		}
-		tokenID, err := strconv.Atoi(args[0])
-		if err != nil || tokenID < 1 {
-			return errors.New("TokenID is not valid")
+		serverID, err := strconv.Atoi(args[0])
+		if err != nil || serverID < 1 {
+			return errors.New("ServerID is not valid")
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		db.DBStart(false)
-		tokenID, _ := strconv.Atoi(args[0])
+		serverID, _ := strconv.Atoi(args[0])
 
-		token, err := db.ReadToken(tokenID)
+		serverToken, err := db.ReadServerTokenFromServerID(serverID)
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading server token: " + err.Error())
+			return
+		}
+
+		token, err := db.ReadToken(serverToken.TokenID)
 		if err != nil {
 			combinedLogger.Warn("An error occurred when reading token: " + err.Error())
 			return
 		}
 
-		combinedLogger.Sugar().Infoln("Token ID: ", token.ID)
-		combinedLogger.Sugar().Infoln("Name: ", token.Name)
+		combinedLogger.Sugar().Infoln("Token ID:", token.ID)
+		combinedLogger.Sugar().Infoln("Name:", token.Name)
 		combinedLogger.Sugar().Infoln("Hashed token is redacted")
 	},
 }
@@ -141,11 +147,12 @@ var tokenDeleteCmd = &cobra.Command{
 			return
 		}
 
-		err = db.DeleteServerToken(serverToken.ID)
+		err = db.DeleteServerToken(serverToken.TokenID)
 		if err != nil {
 			combinedLogger.Warn("An error occurred when deleting tokens: " + err.Error())
 			return
 		}
+		combinedLogger.Info("Deleted token successfully")
 	},
 }
 

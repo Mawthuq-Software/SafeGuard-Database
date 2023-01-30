@@ -105,7 +105,7 @@ type ServerTokens struct {
 
 type Tokens struct {
 	StandardModel
-	Name        string
+	Name        string `gorm:"unique"`
 	AccessToken string `gorm:"unique"`
 }
 
