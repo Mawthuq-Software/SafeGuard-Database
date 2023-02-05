@@ -109,8 +109,8 @@ var userReadCmd = &cobra.Command{
 var userReadNameCmd = &cobra.Command{
 	Use:     "name",
 	Aliases: []string{"n"},
-	Short:   "A command to read all users.",
-	Long:    `This command allows you to read all users in the database.`,
+	Short:   "A command to read users from their username.",
+	Long:    `This command allows you to read users in the database using their username.`,
 	Example: `user read name`,
 	Run: func(cmd *cobra.Command, args []string) {
 		db.DBStart(false)
@@ -148,6 +148,33 @@ var userReadNameCmd = &cobra.Command{
 	},
 }
 
+var userReadAllCmd = &cobra.Command{
+	Use:     "all",
+	Aliases: []string{"a"},
+	Short:   "A command to read all users.",
+	Long:    `This command allows you to read all users in the database.`,
+	Example: `user read all`,
+	Run: func(cmd *cobra.Command, args []string) {
+		db.DBStart(false)
+		users, err := db.ReadAllUsers()
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading users: " + err.Error())
+			return
+		}
+
+		for i := 0; i < len(users); i++ {
+			auth, err := db.FindAuthFromUserID(users[i].ID)
+			if err != nil {
+				combinedLogger.Warn("An error occurred when reading auth: " + err.Error())
+				return
+			}
+			combinedLogger.Info("USER INFO")
+			combinedLogger.Sugar().Infoln(`AuthID: `, users[i].AuthID)
+			combinedLogger.Sugar().Infoln(`Username: `, auth.Username, "\n")
+		}
+	},
+}
+
 var userDeleteCmd = &cobra.Command{
 	Use:     "delete USER_ID",
 	Aliases: []string{"d"},
@@ -180,10 +207,10 @@ func init() {
 	rootCmd.AddCommand(userCmd)
 
 	userCmd.AddCommand(userAddCmd)
-
 	userCmd.AddCommand(userReadCmd)
 
 	userReadCmd.AddCommand(userReadNameCmd)
+	userReadCmd.AddCommand(userReadAllCmd)
 
 	userCmd.AddCommand(userDeleteCmd)
 
