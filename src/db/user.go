@@ -85,6 +85,20 @@ func FindUserFromUsername(username string) (user Users, err error) {
 	return
 }
 
+func ReadAllUsers() (users []Users, err error) {
+	db := DBSystem
+
+	userQuery := db.Find(&users)
+	if errors.Is(userQuery.Error, gorm.ErrRecordNotFound) {
+		err = ErrUserNotFound
+		return
+	} else if userQuery.Error != nil {
+		err = ErrQuery
+		return
+	}
+	return
+}
+
 // DELETE
 func DeleteUser(userID int) (err error) {
 	db := DBSystem

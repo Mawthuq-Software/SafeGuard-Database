@@ -77,6 +77,55 @@ var userReadCmd = &cobra.Command{
 			return
 		}
 
+		auth, err := db.FindAuthFromUserID(userID)
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading auth: " + err.Error())
+			return
+		}
+
+		combinedLogger.Info("USER INFO")
+		combinedLogger.Sugar().Infoln(`AuthID: `, user.AuthID)
+		combinedLogger.Sugar().Infoln(`Username: `, auth.Username, "\n")
+
+		for i := 0; i < len(userKeys); i++ {
+			keyID := userKeys[i].KeyID
+			key, err := db.ReadKey(keyID)
+			if err != nil {
+				combinedLogger.Sugar().Warnf("Error reading key of ID: ", keyID, ""+err.Error())
+				continue
+			}
+			combinedLogger.Sugar().Infoln(`Key ID:`, keyID)
+			combinedLogger.Sugar().Infoln(`Server ID:`, key.ServerID)
+			combinedLogger.Sugar().Infoln(`Enabled:`, key.Enabled)
+			combinedLogger.Sugar().Infoln(`Private IPv4:`, key.PrivateIPv4)
+			combinedLogger.Sugar().Infoln(`Private IPv6:`, key.PrivateIPv6)
+			combinedLogger.Sugar().Infoln(`Public Key:`, key.PublicKey)
+			combinedLogger.Sugar().Infoln(`Used Bandwidth:`, key.UsedBandwidth)
+			combinedLogger.Sugar().Infoln(`Total Bandwidth:`, key.TotalBandwidth, "\n")
+		}
+	},
+}
+
+var userReadNameCmd = &cobra.Command{
+	Use:     "name",
+	Aliases: []string{"n"},
+	Short:   "A command to read users from their username.",
+	Long:    `This command allows you to read users in the database using their username.`,
+	Example: `user read name`,
+	Run: func(cmd *cobra.Command, args []string) {
+		db.DBStart(false)
+		username := args[0]
+		user, err := db.FindUserFromUsername(username)
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading user: " + err.Error())
+			return
+		}
+		userKeys, err := db.ReadUserKeys(user.ID)
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading user: " + err.Error())
+			return
+		}
+
 		combinedLogger.Info("USER INFO")
 		combinedLogger.Sugar().Infoln(`AuthID: `, user.AuthID, "\n")
 
@@ -95,6 +144,33 @@ var userReadCmd = &cobra.Command{
 			combinedLogger.Sugar().Infoln(`Public Key:`, key.PublicKey)
 			combinedLogger.Sugar().Infoln(`Used Bandwidth:`, key.UsedBandwidth)
 			combinedLogger.Sugar().Infoln(`Total Bandwidth:`, key.TotalBandwidth, "\n")
+		}
+	},
+}
+
+var userReadAllCmd = &cobra.Command{
+	Use:     "all",
+	Aliases: []string{"a"},
+	Short:   "A command to read all users.",
+	Long:    `This command allows you to read all users in the database.`,
+	Example: `user read all`,
+	Run: func(cmd *cobra.Command, args []string) {
+		db.DBStart(false)
+		users, err := db.ReadAllUsers()
+		if err != nil {
+			combinedLogger.Warn("An error occurred when reading users: " + err.Error())
+			return
+		}
+
+		for i := 0; i < len(users); i++ {
+			auth, err := db.FindAuthFromUserID(users[i].ID)
+			if err != nil {
+				combinedLogger.Warn("An error occurred when reading auth: " + err.Error())
+				return
+			}
+			combinedLogger.Info("USER INFO")
+			combinedLogger.Sugar().Infoln(`AuthID: `, users[i].AuthID)
+			combinedLogger.Sugar().Infoln(`Username: `, auth.Username, "\n")
 		}
 	},
 }
@@ -131,8 +207,10 @@ func init() {
 	rootCmd.AddCommand(userCmd)
 
 	userCmd.AddCommand(userAddCmd)
-
 	userCmd.AddCommand(userReadCmd)
+
+	userReadCmd.AddCommand(userReadNameCmd)
+	userReadCmd.AddCommand(userReadAllCmd)
 
 	userCmd.AddCommand(userDeleteCmd)
 
