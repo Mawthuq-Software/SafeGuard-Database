@@ -31,6 +31,16 @@ func ReadConfiguration(confID int) (conf Configurations, err error) {
 	return
 }
 
+func ReadConfigurationFromName(name string) (conf Configurations, err error) {
+	db := DBSystem
+	findConf := db.Where("name = ?", name).First(&conf)
+	if findConf.Error == gorm.ErrRecordNotFound {
+		err = ErrConfNotFound
+		return
+	}
+	return
+}
+
 func ReadConfigurationFromServerID(serverID int) (conf Configurations, err error) {
 	serverConfig, err := ReadServerConfigFromServerID(serverID)
 	if err != nil {

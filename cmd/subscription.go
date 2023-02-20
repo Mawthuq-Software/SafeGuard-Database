@@ -15,12 +15,12 @@ import (
 // subscriptionCmd represents the subscription command
 var subscriptionCmd = &cobra.Command{
 	Use:     "subscription",
-	Aliases: []string{"s"},
+	Aliases: []string{"sub"},
 	Short:   "A command to manage subscriptions.",
 	Long:    "A command to manage subscriptions in the database.",
 }
 
-var susbcriptionAddCmd = &cobra.Command{
+var subscriptionAddCmd = &cobra.Command{
 	Use:     "add NAME NUMBER_OF_KEYS TOTAL_BANDWIDTH_IN_MB",
 	Aliases: []string{"a"},
 	Short:   "A command to add subscriptions.",
@@ -222,7 +222,7 @@ var subscriptionDeleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(subscriptionCmd)
-	subscriptionCmd.AddCommand(susbcriptionAddCmd)
+	subscriptionCmd.AddCommand(subscriptionAddCmd)
 
 	subscriptionCmd.AddCommand(subscriptionReadCmd)
 	subscriptionReadCmd.AddCommand(subscriptionReadNameCmd)
